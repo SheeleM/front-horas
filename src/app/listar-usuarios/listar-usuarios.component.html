@@ -1,0 +1,37 @@
+<div class="container">
+    <h2>Usuarios</h2>
+    <div class="table-container">
+      <h3>Listado de usuarios</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>cedula</th>
+            <th>Estado</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let usuario of usuarios">
+            <td>{{ usuario.fullname }}</td>
+            <td>{{ usuario.cedula }}</td>
+            <td>{{ usuario.estado }}</td>
+            <td>
+              <select [(ngModel)]="usuario.rol">
+                <option [ngValue]="1">Usuario</option>
+                <option [ngValue]="2">Admin</option>
+              </select>
+            </td>
+            <td>
+              <button class="edit-btn"><i class="fas fa-pencil-alt"></i></button>
+              <button class="delete-btn" (click)="eliminarUsuario(usuario.id)">
+                <i class="fas fa-times"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  

@@ -1,0 +1,135 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AxiosService } from '../axios.service';
+import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-recuperar-password',
+  standalone: true,
+  imports: [ReactiveFormsModule, CommonModule],
+  templateUrl: './recuperar-password.component.html',
+  styleUrl: './recuperar-password.component.css'
+})
+export class RecuperarPasswordComponent implements OnInit {
+  recuperarForm: FormGroup;
+  showPassword = false;
+  showConfirmPassword = false;
+  loading = false;
+
+  constructor(
+    private fb: FormBuilder, 
+    private axiosService: AxiosService,
+    private router: Router
+  ) {
+    this.recuperarForm = this.fb.group({
+      cedula: ['', [Validators.required, Validators.minLength(10)]],
+      securityAnswer: ['', [Validators.required, Validators.minLength(3)]],
+      newPassword: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+      ]],
+      confirmPassword: ['', Validators.required]
+    }, {
+      validators: this.passwordMatchValidator
+    });
+  }
+
+  ngOnInit(): void {}
+
+  passwordMatchValidator(g: FormGroup) {
+    return g.get('newPassword')?.value === g.get('confirmPassword')?.value 
+      ? null 
+      : { mismatch: true };
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  async onSubmit() {
+    if (!this.recuperarForm.valid) {
+      this.markFormGroupTouched(this.recuperarForm);
+      return;
+    }
+
+    this.loading = true;
+
+    try {
+      const response = await this.axiosService.post('/reset-password', {
+        cedula: this.recuperarForm.get('cedula')?.value,
+        securityAnswer: this.recuperarForm.get('securityAnswer')?.value,
+        newPassword: this.recuperarForm.get('newPassword')?.value
+      });
+
+      Swal.fire({
+        title: 'Éxito',
+        text: 'Tu contraseña ha sido actualizada correctamente',
+        icon: 'success',
+        confirmButtonText: 'Aceptar'
+      }).then(() => {
+        this.router.navigate(['/login']);
+      });
+
+    } catch (error: any) {
+      Swal.fire({
+        title: 'Error',
+        text: error.response?.data?.message || 'Los datos ingresados son incorrectos',
+        icon: 'error',
+        confirmButtonText: 'Aceptar'
+      });
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
+  }
+
+  // Getters para validaciones
+  get cedulaInvalid() {
+    const control = this.recuperarForm.get('cedula');
+    return control?.invalid && control?.touched;
+  }
+
+  get securityAnswerInvalid() {
+    const control = this.recuperarForm.get('securityAnswer');
+    return control?.invalid && control?.touched;
+  }
+
+  get newPasswordInvalid() {
+    const control = this.recuperarForm.get('newPassword');
+    return control?.invalid && control?.touched;
+  }
+
+  get confirmPasswordInvalid() {
+    const control = this.recuperarForm.get('confirmPassword');
+    return (control?.invalid || this.recuperarForm.hasError('mismatch')) && control?.touched;
+  }
+
+  get passwordErrorMessage() {
+    const control = this.recuperarForm.get('newPassword');
+    if (control?.hasError('required')) {
+      return 'La contraseña es requerida';
+    }
+    if (control?.hasError('minlength')) {
+      return 'La contraseña debe tener al menos 8 caracteres';
+    }
+    if (control?.hasError('pattern')) {
+      return 'La contraseña debe contener al menos una letra, un número y un carácter especial';
+    }
+    return '';
+  }
+}
