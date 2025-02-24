@@ -16,7 +16,6 @@
           id="fullname"
           type="text"
           formControlName="fullname"
-          placeholder="Jhon Doe"
           [class.is-invalid]="fullnameInvalid"
         >
       </div>
@@ -28,7 +27,6 @@
           id="cedula"
           type="text"
           formControlName="cedula"
-          placeholder="123456790"
           [class.is-invalid]="cedulaInvalid"
         >
       </div>
@@ -69,7 +67,6 @@
             id="password"
             [type]="showPassword ? 'text' : 'password'"
             formControlName="password"
-            placeholder="******************"
             [class.is-invalid]="passwordInvalid"
           >
           <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
@@ -86,8 +83,7 @@
             id="confirmPassword"
             [type]="showConfirmPassword ? 'text' : 'password'"
             formControlName="confirmPassword"
-            placeholder="******************"
-            [class.is-invalid]="confirmPasswordInvalid"
+           [class.is-invalid]="confirmPasswordInvalid"
           >
           <button type="button" class="toggle-password" (click)="toggleConfirmPasswordVisibility()">
             <i class="far" [class.fa-eye]="!showConfirmPassword" [class.fa-eye-slash]="showConfirmPassword"></i>

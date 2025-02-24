@@ -28,19 +28,20 @@
 
 .sistema-title {
   color: #1B1B1B;
-  font-size: 28px;
-  font-weight: 600;
+  font-size: 25px;
   text-align: center;
   line-height: 1.2;
 }
 
 .crear-cuenta {
+  text-align: center;
   color: #1B1B1B;
-  font-size: 26px;
-  font-weight: 600;
-  margin-bottom: 14px;
-  line-height: 1.2;
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: normal;
+
 }
+
 
 .subtitle {
   color: #999;
