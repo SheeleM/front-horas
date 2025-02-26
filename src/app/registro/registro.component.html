@@ -16,6 +16,7 @@
           id="fullname"
           type="text"
           formControlName="fullname"
+          placeholder="Jhon Doe"
           [class.is-invalid]="fullnameInvalid"
         >
       </div>
@@ -27,6 +28,7 @@
           id="cedula"
           type="text"
           formControlName="cedula"
+          placeholder="123456790"
           [class.is-invalid]="cedulaInvalid"
         >
       </div>
@@ -34,15 +36,9 @@
       <!-- Pregunta de Seguridad -->
       <div class="form-group">
         <label for="preguntas">Pregunta de seguridad</label>
-        <select 
-          id="preguntas"
-          formControlName="preguntas"
-          [class.is-invalid]="preguntasInvalid"
-        >
-          <option value=>Seleccione una pregunta</option>
-          <option value=1>¿Cuál es el nombre de tu primera mascota?</option>
-          <option value=2>¿En qué ciudad naciste?</option>
-          <option value=4>¿Cuál fue tu primera escuela?</option>
+        <select id="preguntas" formControlName="preguntas" [class.is-invalid]="preguntasInvalid">
+          <option value="">Seleccione una pregunta</option>
+          <option *ngFor="let pregunta of preguntas" [value]="pregunta.id">{{ pregunta.pregunta }}</option>
         </select>
       </div>
       
@@ -66,6 +62,7 @@
             id="password"
             [type]="showPassword ? 'text' : 'password'"
             formControlName="password"
+            placeholder="******"
             [class.is-invalid]="passwordInvalid"
           >
           <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
@@ -82,7 +79,8 @@
             id="confirmPassword"
             [type]="showConfirmPassword ? 'text' : 'password'"
             formControlName="confirmPassword"
-           [class.is-invalid]="confirmPasswordInvalid"
+            placeholder="******"
+            [class.is-invalid]="confirmPasswordInvalid"
           >
           <button type="button" class="toggle-password" (click)="toggleConfirmPasswordVisibility()">
             <i class="far" [class.fa-eye]="!showConfirmPassword" [class.fa-eye-slash]="showConfirmPassword"></i>
