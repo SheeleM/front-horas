@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
 })
 export class RegistroComponent implements OnInit {
   registroForm: FormGroup;
+  preguntas: any[] = [];
   showPassword = false;
   showConfirmPassword = false;
 
@@ -23,7 +24,7 @@ export class RegistroComponent implements OnInit {
       password: ['', [
         Validators.required,
         Validators.minLength(8),
-        Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
+        Validators.pattern(/^(?=.[A-Za-z])(?=.\d)[A-Za-z\d]{8,}$/)
       ]],
       confirmPassword: ['', Validators.required],
       preguntas: ['', [Validators.required]],
@@ -33,7 +34,20 @@ export class RegistroComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.cargarPreguntas();
+  }
+
+
+  async cargarPreguntas() {
+    try {
+      const response = await this.axiosService.get('/preguntas');
+      console.log(response);
+      this.preguntas = response.data;
+    } catch (error) {
+      console.error('Error al cargar preguntas:', error);
+    }
+  }
 
   passwordMatchValidator(g: FormGroup) {
     const password = g.get('password')?.value;
@@ -55,17 +69,17 @@ export class RegistroComponent implements OnInit {
       return;
     }
 
-    const { fullname, cedula, password, preguntas, respuestaSeguridad} = this.registroForm.value;
-    
+    const { fullname, cedula, password, preguntas, respuestaSeguridad } = this.registroForm.value;
+
     try {
       const response = await this.axiosService.post('/user', {
-        fullname, 
-        cedula, 
+        fullname,
+        cedula,
         password,
-        preguntas:Number(preguntas),
+        preguntas: Number(preguntas),
         respuestaSeguridad
       });
-      
+
       console.log(response);
       Swal.fire({
         title: 'Registro exitoso',
