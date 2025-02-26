@@ -9,7 +9,7 @@ export class AxiosService {
 
   constructor() {
     this.axiosClient = axios.create({
-      baseURL: 'https://backend-horas-production.up.railway.app/api/v1', // Reemplaza con la URL base de tu API
+      baseURL: 'backend-horas-production.up.railway.app/api/v1', // Reemplaza con la URL base de tu API
       timeout: 10000, // Tiempo de espera en milisegundos
       headers: {
         'Content-Type': 'application/json',
