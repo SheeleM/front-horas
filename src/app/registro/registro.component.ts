@@ -58,7 +58,7 @@ export class RegistroComponent implements OnInit {
     const { fullname, cedula, password, preguntas, respuestaSeguridad} = this.registroForm.value;
     
     try {
-      const response = await this.axiosService.post('/user', {
+      const response = await this.axiosService.post('https://backend-horas-production-4a76.up.railway.app/api/v1/user', {
         fullname, 
         cedula, 
         password,
