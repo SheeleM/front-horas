@@ -22,9 +22,7 @@ export class RegistroComponent implements OnInit {
       fullname: ['', [Validators.required, Validators.minLength(3)]],
       cedula: ['', [Validators.required, Validators.minLength(10)]],
       password: ['', [
-        Validators.required,
-        Validators.minLength(8),
-        Validators.pattern(/^(?=.[A-Za-z])(?=.\d)[A-Za-z\d]{8,}$/)
+        Validators.required
       ]],
       confirmPassword: ['', Validators.required],
       preguntas: ['', [Validators.required]],
