@@ -15,6 +15,7 @@ h2 {
   margin-right: 190px;
   border-radius: 8px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
 }
 
 h3 {
@@ -43,6 +44,7 @@ td select {
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  width: 100%;
 }
 
 button {
@@ -63,4 +65,34 @@ button {
 
 button:hover {
   transform: scale(1.1);
+}
+
+/* Estilos para el botón de guardar con icono verde */
+.save-btn {
+  padding: 5px 10px;
+  border-radius: 4px;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #4285F4; /* Color verde para el icono */
+}
+
+.save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.save-btn.changes-pending {
+  background-color: #4285F4; /* Fondo verde cuando hay cambios pendientes */
+  color: white;
+  border: 1px solid #4285F4;
+}
+
+.save-btn.changes-pending:hover {
+  background-color: #4285F4;
+  transform: scale(1.05);
+}
+
+tr:hover {
+  background-color: #f5f5f5;
 }
