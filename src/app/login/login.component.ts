@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AxiosService } from '../axios.service';
 import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -17,11 +18,11 @@ export class LoginComponent implements OnInit {
   showPassword: boolean = false;
   errorMessage: string = '';
 
-  constructor(private formBuilder: FormBuilder, private axiosService: AxiosService) {}
+  constructor(private formBuilder: FormBuilder, private axiosService: AxiosService,private router: Router) {}
 
   ngOnInit(): void {
     this.loginForm = this.formBuilder.group({
-      username: ['', Validators.required],
+      cedula: ['', Validators.required],
       password: ['', Validators.required]
     });
   }
@@ -37,13 +38,16 @@ export class LoginComponent implements OnInit {
   async onSubmit(): Promise<void> {
     this.submitted = true;
     this.errorMessage = '';
-    
     if (this.loginForm.invalid) {
       return;
     }
 
+    const loginData = {
+      ...this.loginForm.value,
+      cedula: Number(this.loginForm.value.cedula)
+    };
     try {
-      const response = await this.axiosService.post('/user', this.loginForm.value);
+      const response = await this.axiosService.post('/login/login', loginData);
       const { token } = response.data;
       localStorage.setItem('token', token);
       Swal.fire({
@@ -52,6 +56,7 @@ export class LoginComponent implements OnInit {
         icon: 'success',
         confirmButtonText: 'Aceptar'
       });
+      this.router.navigate(['/listarUsuario']); // Redirige al login
     } catch (error) {
       Swal.fire({
         title: 'Error en el inicio de sesión',
