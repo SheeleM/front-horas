@@ -1,0 +1,177 @@
+<div class="registro-container">
+  <div class="turno-form-container">
+    <!-- Sección de Registro de turnos -->
+    <div class="card mb-4">
+      <div class="card-header bg-white">
+        <h2 class="text-primary">Registro de turnos</h2>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="turnoForm" (ngSubmit)="agregarTurno()">
+          <!-- Nombre turno y Código en la misma fila -->
+          <!-- Nombre turno y Código en la misma fila -->
+          <div class="row gx-3 mb-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="nombre">Nombre turno</label>
+                <input
+                  id="nombre"
+                  type="text"
+                  formControlName="nombre"
+                  [class.is-invalid]="fullnameInvalid"
+                  class="form-control"
+                />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="codigo">Código</label>
+                <input
+                  id="codigo"
+                  type="text"
+                  formControlName="codigo"
+                  class="form-control"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Hora inicio y Hora fin en la misma fila -->
+          <div class="row gx-3 mb-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="horaInicio">Hora inicio</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="horaInicio"
+                  formControlName="horaInicio"
+                  placeholder="0800"
+                />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="horaFin">Hora fin</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="horaFin"
+                  formControlName="horaFin"
+                  placeholder="1700"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Día inicio y Día fin en la misma fila -->
+          <div class="row gx-3 mb-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="diaInicio">Día inicio</label>
+                <select
+                  class="form-select"
+                  id="diaInicio"
+                  formControlName="diaInicio"
+                >
+                  <option value="">Seleccionar</option>
+                  <option value="lunes">Lunes</option>
+                  <option value="martes">Martes</option>
+                  <option value="miercoles">Miércoles</option>
+                  <option value="jueves">Jueves</option>
+                  <option value="viernes">Viernes</option>
+                  <option value="sabado">Sábado</option>
+                  <option value="domingo">Domingo</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="diaFin">Día fin</label>
+                <select
+                  class="form-select"
+                  id="diaFin"
+                  formControlName="diaFin"
+                >
+                  <option value="">Seleccionar</option>
+                  <option value="lunes">Lunes</option>
+                  <option value="martes">Martes</option>
+                  <option value="miercoles">Miércoles</option>
+                  <option value="jueves">Jueves</option>
+                  <option value="viernes">Viernes</option>
+                  <option value="sabado">Sábado</option>
+                  <option value="domingo">Domingo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mt-4">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="turnoForm.invalid"
+            >
+              Agregar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Sección de Listado de turnos -->
+    <div class="card">
+      <div class="card-header bg-white">
+        <h2 class="text-primary">Listado de turnos</h2>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr class="text-center">
+                <th scope="col">Nombre</th>
+                <th scope="col">Código</th>
+                <th scope="col">Hora inicio</th>
+                <th scope="col">Día inicio</th>
+                <th scope="col">Hora Fin</th>
+                <th scope="col">Día fin</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (turno of turnos; track turno.id) {
+              <tr class="bg-light-blue text-center">
+                <td>{{ turno.nombre }}</td>
+                <td>{{ turno.codigo }}</td>
+                <td>{{ turno.horaInicio }}</td>
+                <td>{{ turno.diaInicio }}</td>
+                <td>{{ turno.horaFin }}</td>
+                <td>{{ turno.diaFin }}</td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-icon me-2"
+                    (click)="editarTurno(turno)"
+                  >
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-icon"
+                    (click)="eliminarTurno(turno.id!)"
+                  >
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </td>
+              </tr>
+              } @empty {
+              <tr>
+                <td colspan="7" class="text-center py-3">
+                  No hay turnos registrados
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

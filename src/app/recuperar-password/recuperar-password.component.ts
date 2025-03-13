@@ -19,17 +19,16 @@ export class RecuperarPasswordComponent implements OnInit {
   loading = false;
 
   constructor(
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
     private axiosService: AxiosService,
     private router: Router
   ) {
     this.recuperarForm = this.fb.group({
-      cedula: ['', [Validators.required, Validators.minLength(10)]],
+      cedula: ['', [Validators.required, Validators.minLength(5)]],
       securityAnswer: ['', [Validators.required, Validators.minLength(3)]],
       newPassword: ['', [
         Validators.required,
-        Validators.minLength(8),
-        Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+        Validators.minLength(6),
       ]],
       confirmPassword: ['', Validators.required]
     }, {
@@ -37,11 +36,11 @@ export class RecuperarPasswordComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   passwordMatchValidator(g: FormGroup) {
-    return g.get('newPassword')?.value === g.get('confirmPassword')?.value 
-      ? null 
+    return g.get('newPassword')?.value === g.get('confirmPassword')?.value
+      ? null
       : { mismatch: true };
   }
 
@@ -62,12 +61,17 @@ export class RecuperarPasswordComponent implements OnInit {
     this.loading = true;
 
     try {
-      const response = await this.axiosService.post('/reset-password', {
-        cedula: this.recuperarForm.get('cedula')?.value,
-        securityAnswer: this.recuperarForm.get('securityAnswer')?.value,
+      const response = await this.axiosService.post('/user/recover', {
+        cedula: Number(this.recuperarForm.get('cedula')?.value),
+        respuestaSeguridad: this.recuperarForm.get('securityAnswer')?.value,
         newPassword: this.recuperarForm.get('newPassword')?.value
       });
-
+      if (!response || !response.data) {
+        throw new Error('Respuesta incompleta del servidor');
+      }
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error en la recuperación de contraseña');
+      }
       Swal.fire({
         title: 'Éxito',
         text: 'Tu contraseña ha sido actualizada correctamente',
@@ -78,9 +82,20 @@ export class RecuperarPasswordComponent implements OnInit {
       });
 
     } catch (error: any) {
+      console.error('Error en recuperación de contraseña:', error);
+      let errorMessage = 'Ocurrió un error al procesar tu solicitud';
+      if (error.response) {
+        errorMessage = error.response.data?.message ||
+          'Los datos ingresados son incorrectos';
+      } else if (error.request) {
+        errorMessage = 'No se recibió respuesta del servidor. Verifica tu conexión.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       Swal.fire({
         title: 'Error',
-        text: error.response?.data?.message || 'Los datos ingresados son incorrectos',
+        text: errorMessage,
         icon: 'error',
         confirmButtonText: 'Aceptar'
       });
