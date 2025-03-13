@@ -18,12 +18,6 @@
 
   <div class="section-title">Tableros</div>
   <ul class="menu-list">
-    <li *ngFor="let item of menuItems.tableros" 
-        class="menu-item"
-        [routerLink]="item.link"
-        routerLinkActive="active">
-      <i class="fas {{item.icon}}"></i>
-      {{item.title}}
-    </li>
+    <input type="text" (click)="navigateToPage()" placeholder="Haz clic aquí">
   </ul>
 </div>
