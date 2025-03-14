@@ -3,11 +3,12 @@
     <!-- Sección de Registro de turnos -->
     <div class="card mb-4">
       <div class="card-header bg-white">
-        <h2 class="text-primary">Registro de turnos</h2>
+        <h2 class="text-primary">
+          {{ editandoTurno ? "Editar turno" : "Registro de turnos" }}
+        </h2>
       </div>
       <div class="card-body">
-        <form [formGroup]="turnoForm" (ngSubmit)="agregarTurno()">
-          <!-- Nombre turno y Código en la misma fila -->
+        <form [formGroup]="turnoForm" (ngSubmit)="onSubmit()">
           <!-- Nombre turno y Código en la misma fila -->
           <div class="row gx-3 mb-3">
             <div class="col-md-6">
@@ -20,6 +21,9 @@
                   [class.is-invalid]="fullnameInvalid"
                   class="form-control"
                 />
+                <small class="text-danger" *ngIf="fullnameInvalid">
+                  El nombre del turno es requerido
+                </small>
               </div>
             </div>
             <div class="col-md-6">
@@ -29,8 +33,12 @@
                   id="codigo"
                   type="text"
                   formControlName="codigo"
+                  [class.is-invalid]="codigoInvalid"
                   class="form-control"
                 />
+                <small class="text-danger" *ngIf="codigoInvalid">
+                  El código es requerido
+                </small>
               </div>
             </div>
           </div>
@@ -41,24 +49,32 @@
               <div class="form-group">
                 <label for="horaInicio">Hora inicio</label>
                 <input
-                  type="text"
+                  type="time"
                   class="form-control"
                   id="horaInicio"
                   formControlName="horaInicio"
                   placeholder="0800"
+                  [class.is-invalid]="horaInicioInvalid"
                 />
+                <small class="text-danger" *ngIf="horaInicioInvalid">
+                  Formato requerido: 4 dígitos (ej. 0800)
+                </small>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-group">
                 <label for="horaFin">Hora fin</label>
                 <input
-                  type="text"
+                  type="time"
                   class="form-control"
                   id="horaFin"
                   formControlName="horaFin"
                   placeholder="1700"
+                  [class.is-invalid]="horaFinInvalid"
                 />
+                <small class="text-danger" *ngIf="horaFinInvalid">
+                  Formato requerido: 4 dígitos (ej. 1700)
+                </small>
               </div>
             </div>
           </div>
@@ -72,6 +88,7 @@
                   class="form-select"
                   id="diaInicio"
                   formControlName="diaInicio"
+                  [class.is-invalid]="diaInicioInvalid"
                 >
                   <option value="">Seleccionar</option>
                   <option value="lunes">Lunes</option>
@@ -82,6 +99,9 @@
                   <option value="sabado">Sábado</option>
                   <option value="domingo">Domingo</option>
                 </select>
+                <small class="text-danger" *ngIf="diaInicioInvalid">
+                  Seleccione el día de inicio
+                </small>
               </div>
             </div>
             <div class="col-md-6">
@@ -91,6 +111,7 @@
                   class="form-select"
                   id="diaFin"
                   formControlName="diaFin"
+                  [class.is-invalid]="diaFinInvalid"
                 >
                   <option value="">Seleccionar</option>
                   <option value="lunes">Lunes</option>
@@ -101,6 +122,9 @@
                   <option value="sabado">Sábado</option>
                   <option value="domingo">Domingo</option>
                 </select>
+                <small class="text-danger" *ngIf="diaFinInvalid">
+                  Seleccione el día de fin
+                </small>
               </div>
             </div>
           </div>
@@ -111,7 +135,15 @@
               class="btn btn-primary"
               [disabled]="turnoForm.invalid"
             >
-              Agregar
+              {{ editandoTurno ? "Actualizar" : "Agregar" }}
+            </button>
+            <button
+              *ngIf="editandoTurno"
+              type="button"
+              class="btn btn-secondary ms-2"
+              (click)="cancelarEdicion()"
+            >
+              Cancelar
             </button>
           </div>
         </form>
@@ -151,13 +183,13 @@
                     class="btn btn-sm btn-icon me-2"
                     (click)="editarTurno(turno)"
                   >
-                    <i class="bi bi-pencil-square"></i>
+                    <i class="fas fa-pencil-alt"></i>
                   </button>
                   <button
                     class="btn btn-sm btn-icon"
                     (click)="eliminarTurno(turno.id!)"
                   >
-                    <i class="bi bi-x-lg"></i>
+                    <i class="fas fa-times"></i>
                   </button>
                 </td>
               </tr>

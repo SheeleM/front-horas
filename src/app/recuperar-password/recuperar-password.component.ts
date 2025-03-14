@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
   styleUrl: './recuperar-password.component.css'
 })
 export class RecuperarPasswordComponent implements OnInit {
+  
   recuperarForm: FormGroup;
   showPassword = false;
   showConfirmPassword = false;
@@ -110,6 +111,15 @@ export class RecuperarPasswordComponent implements OnInit {
       if (control instanceof FormGroup) {
         this.markFormGroupTouched(control);
       }
+    });
+  }
+
+  forgotSecurityAnswer(): void {
+    Swal.fire({
+      title: '¿Olvidaste tu respuesta de seguridad?',
+      text: 'Por favor comunícate con el administrador del sistema para restablecer tu cuenta',
+      icon: 'info',
+      confirmButtonText: 'OK'
     });
   }
 
