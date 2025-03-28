@@ -25,19 +25,81 @@ interface Usuario {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './listar-usuarios.component.html',
-  styleUrl: './listar-usuarios.component.css'
+  styleUrls: ['./listar-usuarios.component.css']
 })
 export class ListarUsuariosComponent implements OnInit {
   usuarios: Usuario[] = [];
   roles: Rol[] = [];
   usuariosOriginales: Record<number, Usuario> = {};
+  mostrarContrasena: boolean = false;
+  
+  mostrarPopup = false;
+  usuarioSeleccionado: Usuario | null = null;
+  nuevaContrasena: string = '';
+  //confirmasContrasena: string = '';
 
-  constructor(private axiosService: AxiosService) { }
+  constructor(private axiosService: AxiosService) {}
+
+  abrirPopup(usuario: Usuario) {
+    this.usuarioSeleccionado = usuario;
+    this.mostrarPopup = true;
+    this.nuevaContrasena = '';
+    //this.confirmasContrasena = '';
+  }
+
+  cerrarPopup() {
+    this.mostrarPopup = false;
+    this.nuevaContrasena = '';
+    //this.confirmasContrasena = '';
+    this.usuarioSeleccionado = null;
+  }
 
   ngOnInit(): void {
     this.obtenerRoles().then(() => {
       this.obtenerUsuarios();
     });
+  }
+
+
+  
+  async asignarContrasena() {
+    console.log('lac edulaaaaaaaaaaaaaaaa',this.usuarioSeleccionado?.cedula)
+    if (!this.usuarioSeleccionado) {
+      Swal.fire('Error', 'No hay usuario seleccionado', 'error');
+      return;
+    }
+    if (!this.nuevaContrasena.trim()) {
+      Swal.fire('Error', 'La contraseña no puede estar vacía', 'error');
+      return;
+    }
+    /*if (this.nuevaContrasena !== this.confirmasContrasena) {
+      Swal.fire('Error', 'Las contraseñas no coinciden', 'error');
+      return;
+    }*/
+    try {
+      // llamada al backend para cambiar la contraseña
+      await this.axiosService.post(`/user/update-password-admin`, 
+        {  cedula:this.usuarioSeleccionado.cedula,
+          newPassword: this.nuevaContrasena 
+
+        });
+      
+      Swal.fire(
+        'Actualizado',
+        `La contraseña del usuario ${this.usuarioSeleccionado.fullname} ha sido actualizada`,
+        'success'
+      );
+
+      console.log(`Asignando contraseña al usuario: ${this.usuarioSeleccionado.fullname}`);
+      this.cerrarPopup();
+    } catch (error) {
+      console.error('Error al cambiar la contraseña:', error);
+      Swal.fire(
+        'Error',
+        'No se pudo actualizar la contraseña. Inténtalo de nuevo más tarde.',
+        'error'
+      );
+    }
   }
 
   async obtenerRoles() {
@@ -54,8 +116,7 @@ export class ListarUsuariosComponent implements OnInit {
       const response = await this.axiosService.get<Usuario[]>('/user');
       this.usuarios = response.data;
       this.usuarios.forEach(usuario => {
-        if (usuario.rol) {
-          console.log(usuario.rol.idRol)
+        if (usuario.rol && usuario.rol.idRol) {
           const matchedRole = this.roles.find(role => role.idRol === usuario.rol.idRol);
           if (matchedRole) {
             usuario.rol = matchedRole;
@@ -75,16 +136,12 @@ export class ListarUsuariosComponent implements OnInit {
     }
   }
 
-
-
-  // Método para detectar cambios en el estado
   detectarCambiosEstado(usuario: Usuario) {
     const original = this.usuariosOriginales[usuario.id];
     usuario.cambiosEstado = usuario.estado !== original.estado;
     this.actualizarEstadoCambiosPendientes(usuario);
   }
 
-  // Método para detectar cambios en el rol
   detectarCambiosRol(usuario: Usuario) {
     const original = this.usuariosOriginales[usuario.id];
     usuario.cambiosRol = usuario.rol.idRol !== original.rol.idRol;
@@ -132,7 +189,4 @@ export class ListarUsuariosComponent implements OnInit {
       );
     }
   }
-
-
-
 }
