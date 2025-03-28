@@ -13,11 +13,12 @@ import { Router } from '@angular/router';
   styleUrl: './recuperar-password.component.css'
 })
 export class RecuperarPasswordComponent implements OnInit {
-  
   recuperarForm: FormGroup;
   showPassword = false;
   showConfirmPassword = false;
   loading = false;
+  securityQuestion: string = '';
+  loadingQuestion = false;
 
   constructor(
     private fb: FormBuilder,
@@ -37,7 +38,35 @@ export class RecuperarPasswordComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.recuperarForm.get('cedula')?.valueChanges.subscribe(value => {
+      if (value && value.length >= 5) {
+        this.loadSecurityQuestion(value);
+      } else {
+        this.securityQuestion = '';
+      }
+    });
+  }
+
+  async loadSecurityQuestion(cedula: string) {
+    this.loadingQuestion = true;
+    this.securityQuestion = 'Cargando pregunta...';
+    
+    try {
+      const response = await this.axiosService.get(`/user/security-question?cedula=${encodeURIComponent(cedula)}`);
+      
+      if (response && response.data && response.data.success) {
+        this.securityQuestion = response.data.question || '¿Cuál es tu pregunta de seguridad?';
+      } else {
+        this.securityQuestion = 'No se encontró pregunta para esta cédula';
+      }
+    } catch (error) {
+      console.error('Error al cargar pregunta de seguridad:', error);
+      this.securityQuestion = 'Error al cargar la pregunta';
+    } finally {
+      this.loadingQuestion = false;
+    }
+  }
 
   passwordMatchValidator(g: FormGroup) {
     return g.get('newPassword')?.value === g.get('confirmPassword')?.value

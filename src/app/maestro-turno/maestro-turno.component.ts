@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AxiosService } from '../axios.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 
 interface Turno {
-  id?: number;
+  idTurno?: number;
   nombre: string;
   codigo: string;
   diaInicio: string;
@@ -15,6 +15,15 @@ interface Turno {
   horaFin: string;
 }
 
+interface PaginatedResponse {
+  data: Turno[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
 
 @Component({
   selector: 'app-maestro-turno',
@@ -23,12 +32,17 @@ interface Turno {
   templateUrl: './maestro-turno.component.html',
   styleUrl: './maestro-turno.component.css'
 })
-export class MaestroTurnoComponent implements OnInit{
+export class MaestroTurnoComponent implements OnInit {
   turnoForm!: FormGroup;
   turnos: Turno[] = [];
+  turnosFiltrados: Turno[] = [];
   editandoTurno: boolean = false;
   turnoEditId: number | null = null;
-
+  paginaActual: number = 1;
+  itemsPorPagina: number = 5;
+  totalPaginas: number = 1;
+  terminoBusqueda: string = '';
+  Math = Math;
   constructor(
     private fb: FormBuilder,
     private axiosService: AxiosService,
@@ -44,7 +58,7 @@ export class MaestroTurnoComponent implements OnInit{
       diaInicio: ['', Validators.required],
       horaInicio: ['', [Validators.required]],
       diaFin: ['', Validators.required],
-       horaFin: ['', [Validators.required]]
+      horaFin: ['', [Validators.required]]
     });
   }
 
@@ -56,33 +70,27 @@ export class MaestroTurnoComponent implements OnInit{
     try {
       const response = await this.axiosService.get('/turno');
       this.turnos = response.data;
+      this.aplicarFiltro();
+      console.log(response);
     } catch (error) {
       this.mostrarError('No se pudieron cargar los turnos');
     }
   }
 
-  // Método para crear un nuevo turno
   async crearTurno(): Promise<void> {
-
-    
-    console.log("Datos antes de enviarhhhhhhhhhhhhhhhhhhh:", this.turnoForm.value);
-
     if (!this.turnoForm.valid) {
       this.markFormGroupTouched(this.turnoForm);
       return;
     }
 
-    const turnoData = {
-      ...this.turnoForm.value,
-    };
-
+    const turnoData = { ...this.turnoForm.value, };
     if (turnoData.horaInicio) {
       const [horas, minutos] = turnoData.horaInicio.split(':');
       const horaInicio = new Date();
       horaInicio.setHours(parseInt(horas), parseInt(minutos), 0);
       turnoData.horaInicio = horaInicio.toISOString();
     }
-    
+
     if (turnoData.horaFin) {
       const [horas, minutos] = turnoData.horaFin.split(':');
       const horaFin = new Date();
@@ -90,23 +98,15 @@ export class MaestroTurnoComponent implements OnInit{
       turnoData.horaFin = horaFin.toISOString();
     }
     try {
-      console.log("TRYYYYYYYYYY:", turnoData);
-
       const response = await this.axiosService.post('/turno', turnoData);
       this.mostrarExito('Turno creado correctamente');
       this.resetForm();
       this.cargarTurnos();
     } catch (error) {
-      console.log("TRYYYYYYYYYY:", turnoData);
-
-      console.error('Error al crear turno:', error);
-      this.mostrarError('No se pudo crear el turno');
-      console.log("Datos antes de enviarjjjjjjjjjjj:",...this.turnoForm.value);
-
+      this.mostrarError('El codigo de turno ya esta en uso');
     }
   }
 
-  // Método para actualizar un turno existente
   async actualizarTurno(): Promise<void> {
     if (!this.turnoForm.valid || this.turnoEditId === null) {
       this.markFormGroupTouched(this.turnoForm);
@@ -114,9 +114,24 @@ export class MaestroTurnoComponent implements OnInit{
     }
 
     const turnoData = this.turnoForm.value;
+    const id = Number(this.turnoEditId);
+
+    if (turnoData.horaInicio) {
+      const [horas, minutos] = turnoData.horaInicio.split(':');
+      const horaInicio = new Date();
+      horaInicio.setHours(parseInt(horas), parseInt(minutos), 0);
+      turnoData.horaInicio = horaInicio.toISOString();
+    }
+
+    if (turnoData.horaFin) {
+      const [horas, minutos] = turnoData.horaFin.split(':');
+      const horaFin = new Date();
+      horaFin.setHours(parseInt(horas), parseInt(minutos), 0);
+      turnoData.horaFin = horaFin.toISOString();
+    }
 
     try {
-      const response = await this.axiosService.put(`/turno/${this.turnoEditId}`, turnoData);
+      const response = await this.axiosService.put(`/turno/${id}`, turnoData);
       this.mostrarExito('Turno actualizado correctamente');
       this.resetForm();
       this.cargarTurnos();
@@ -124,7 +139,6 @@ export class MaestroTurnoComponent implements OnInit{
       this.mostrarError('No se pudo actualizar el turno');
     }
   }
-
 
   onSubmit(): void {
     if (this.editandoTurno) {
@@ -135,22 +149,35 @@ export class MaestroTurnoComponent implements OnInit{
   }
 
   editarTurno(turno: Turno): void {
-    if (!turno || turno.id === undefined) {
+    if (!turno || turno.idTurno === undefined) {
       console.error('Turno inválido o sin ID');
       return;
+    }
+
+    let horaInicio = turno.horaInicio;
+    let horaFin = turno.horaFin;
+
+    if (turno.horaInicio && turno.horaInicio.includes('T')) {
+      const fecha = new Date(turno.horaInicio);
+      horaInicio = `${fecha.getHours().toString().padStart(2, '0')}:${fecha.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    if (turno.horaFin && turno.horaFin.includes('T')) {
+      const fecha = new Date(turno.horaFin);
+      horaFin = `${fecha.getHours().toString().padStart(2, '0')}:${fecha.getMinutes().toString().padStart(2, '0')}`;
     }
 
     this.turnoForm.patchValue({
       nombre: turno.nombre || '',
       codigo: turno.codigo || '',
       diaInicio: turno.diaInicio || '',
-      horaInicio: turno.horaInicio || '',
+      horaInicio: horaInicio || '',
       diaFin: turno.diaFin || '',
-      horaFin: turno.horaFin || ''
+      horaFin: horaFin || ''
     });
 
     this.editandoTurno = true;
-    this.turnoEditId = turno.id;
+    this.turnoEditId = turno.idTurno;
 
     console.log('Editando turno:', turno);
     console.log('ID del turno en edición:', this.turnoEditId);
@@ -158,7 +185,6 @@ export class MaestroTurnoComponent implements OnInit{
 
   async eliminarTurno(id: number): Promise<void> {
     if (id === undefined || id === null) {
-      console.error('ID de turno inválido');
       return;
     }
 
@@ -180,7 +206,6 @@ export class MaestroTurnoComponent implements OnInit{
         this.cargarTurnos();
       }
     } catch (error) {
-      console.error('Error al eliminar turno:', error);
       this.mostrarError('No se pudo eliminar el turno');
     }
   }
@@ -193,6 +218,61 @@ export class MaestroTurnoComponent implements OnInit{
     this.turnoForm.reset();
     this.editandoTurno = false;
     this.turnoEditId = null;
+  }
+
+  // Métodos para buscar y paginar
+  buscar(event: Event): void {
+    this.terminoBusqueda = (event.target as HTMLInputElement).value.toLowerCase().trim();
+    this.paginaActual = 1; // Reset to first page when searching
+    this.aplicarFiltro();
+  }
+
+  aplicarFiltro(): void {
+    // Filtrar por término de búsqueda
+    if (this.terminoBusqueda) {
+      this.turnosFiltrados = this.turnos.filter(turno => 
+        turno.nombre.toLowerCase().includes(this.terminoBusqueda) ||
+        turno.codigo.toLowerCase().includes(this.terminoBusqueda) ||
+        turno.diaInicio.toLowerCase().includes(this.terminoBusqueda) ||
+        turno.diaFin.toLowerCase().includes(this.terminoBusqueda)
+      );
+    } else {
+      this.turnosFiltrados = [...this.turnos];
+    }
+
+    this.totalPaginas = Math.ceil(this.turnosFiltrados.length / this.itemsPorPagina);
+    
+    if (this.paginaActual > this.totalPaginas) {
+      this.paginaActual = this.totalPaginas || 1;
+    }
+  }
+
+  cambiarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaActual = pagina;
+    }
+  }
+
+  get turnosPaginados(): Turno[] {
+    const inicio = (this.paginaActual - 1) * this.itemsPorPagina;
+    const fin = inicio + this.itemsPorPagina;
+    return this.turnosFiltrados.slice(inicio, fin);
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaActual > 1) {
+      this.paginaActual--;
+    }
+  }
+
+  paginaSiguiente(): void {
+    if (this.paginaActual < this.totalPaginas) {
+      this.paginaActual++;
+    }
+  }
+
+  arregloPaginas(): number[] {
+    return Array(this.totalPaginas).fill(0).map((_, index) => index + 1);
   }
 
   private markFormGroupTouched(formGroup: FormGroup) {
@@ -232,7 +312,7 @@ export class MaestroTurnoComponent implements OnInit{
       confirmButtonText: 'OK'
     });
   }
- 
+
   get fullnameInvalid() {
     const control = this.turnoForm.get('nombre');
     return control?.invalid && control?.touched;
