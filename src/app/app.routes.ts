@@ -4,6 +4,7 @@ import { RegistroComponent } from './registro/registro.component';
 import { ListarUsuariosComponent } from './listar-usuarios/listar-usuarios.component';
 import { RecuperarPasswordComponent } from './recuperar-password/recuperar-password.component';
 import { MaestroTurnoComponent } from './maestro-turno/maestro-turno.component';
+import { RegistroTurnoComponent } from './registro-turno/registro-turno.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -11,7 +12,9 @@ export const routes: Routes = [
     { path: 'registro', component: RegistroComponent },
     { path: 'listarUsuario', component: ListarUsuariosComponent },
     { path: 'recovery', component: RecuperarPasswordComponent },
-    { path: 'maestroTurno', component: MaestroTurnoComponent }
+    { path: 'maestroTurno', component: MaestroTurnoComponent },
+    { path: 'RegistroTurno', component: RegistroTurnoComponent }
+
 
 
 ];

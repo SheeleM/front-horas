@@ -39,7 +39,10 @@ export class RecuperarPasswordComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.recuperarForm.get('cedula')?.valueChanges.subscribe(value => {
+   this.recuperarForm.get('cedula')?.valueChanges.subscribe(value => {
+    console.log("valor cedula from "+value)
+      console.log('Tipo de dato de cédula:', typeof value);
+
       if (value && value.length >= 5) {
         this.loadSecurityQuestion(value);
       } else {
@@ -48,13 +51,21 @@ export class RecuperarPasswordComponent implements OnInit {
     });
   }
 
-  async loadSecurityQuestion(cedula: string) {
+  async loadSecurityQuestion(cedula: string) { 
+    //const cedulaNumero = parseInt(cedula, 10);
+
+   // console.log('Cédula que se enviará al servidor:', cedulaNumero);
+  // Verifica el tipo de dato
+ // console.log('Tipo de dato de cédula:', typeof cedulaNumero);
+  
     this.loadingQuestion = true;
     this.securityQuestion = 'Cargando pregunta...';
     
     try {
       const response = await this.axiosService.get(`/user/security-question?cedula=${encodeURIComponent(cedula)}`);
-      
+      console.error('Respuesta del servidor:',response)
+      console.error('response.data:',response.data)
+      console.error('response.data.successresponse.data.success',response.data.success)
       if (response && response.data && response.data.success) {
         this.securityQuestion = response.data.question || '¿Cuál es tu pregunta de seguridad?';
       } else {

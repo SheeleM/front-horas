@@ -1,0 +1,50 @@
+<div class="container">
+    <h2>Programación Mensual de Turnos</h2>
+
+    <form [formGroup]="AsignacionTurnoForm" >
+        <label>Mes</label>
+        <select formControlName="month">
+            <option value="">Seleccionar</option>
+            <option value="Enero">Enero</option>
+            <option value="Febrero">Febrero</option>
+            <option value="Marzo">Marzo</option>
+            <option value="Abril">Abril</option>
+            <option value="Mayo">Mayo</option>
+            <option value="Junio">Junio</option>
+            <option value="Julio">Julio</option>
+            <option value="Agosto">Agosto</option>
+            <option value="Septiembre">Septiembre</option>
+            <option value="Octubre">Octubre</option>
+            <option value="Noviembre">Noviembre</option>
+            <option value="Diciembre">Diciembre</option>
+     
+        </select>
+    </form>
+    <div id='cajaIngenieros'>
+    <h3 style="color: #1a73e8;">Asignación múltiple</h3>
+    <mat-form-field class="example-chip-list" appearance="outline">
+      <mat-chip-grid #chipGrid aria-label="Selección de ingenieros">
+        <mat-chip-row
+          *ngFor="let ing of selectedIngenieros" 
+          [removable]="true" 
+          (removed)="remove(ing)">
+          {{ing}}
+          <button matChipRemove>  ✖
+          </button>
+        </mat-chip-row>
+        <input 
+          placeholder="Buscar ingeniero"
+          #ingenieroInput
+          [formControl]="ingenieroCtrl"
+          [matAutocomplete]="auto"
+          [matChipInputFor]="chipGrid">
+      </mat-chip-grid>
+      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+        <mat-option *ngFor="let ingeniero of filteredIngenieros | async" [value]="ingeniero">
+          {{ingeniero}}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+
+    </div>
