@@ -3,11 +3,18 @@ import { Router, NavigationEnd,RouterOutlet } from '@angular/router';
 import { SidebarLeftComponent } from "./components/sidebar-left/sidebar-left.component";
 import { SidebarRightComponent } from "./components/sidebar-right/sidebar-right.component";
 import { CommonModule } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
+import { MatChipInput } from '@angular/material/chips';
+
+
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule,RouterOutlet,SidebarLeftComponent, SidebarRightComponent],
+  imports: [CommonModule,RouterOutlet,SidebarLeftComponent, SidebarRightComponent,MatFormFieldModule,[MatChipsModule],MatAutocompleteModule,MatInputModule,MatChipInput] , 
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
