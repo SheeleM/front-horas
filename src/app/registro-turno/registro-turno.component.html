@@ -1,50 +1,117 @@
-<div class="container">
-    <h2>Programación Mensual de Turnos</h2>
+<div class="registro-container">
+  <div class="turno-form-container">
+    <div class="card mb-4">
+      <div class="card-header bg-white">
+        <h2 class="text-primary">
+          {{ editandoTurno ? "Editar turno" : "Programación Mensual de Turnos" }}
+        </h2>
+      </div>
 
-    <form [formGroup]="AsignacionTurnoForm" >
-        <label>Mes</label>
-        <select formControlName="month">
-            <option value="">Seleccionar</option>
-            <option value="Enero">Enero</option>
-            <option value="Febrero">Febrero</option>
-            <option value="Marzo">Marzo</option>
-            <option value="Abril">Abril</option>
-            <option value="Mayo">Mayo</option>
-            <option value="Junio">Junio</option>
-            <option value="Julio">Julio</option>
-            <option value="Agosto">Agosto</option>
-            <option value="Septiembre">Septiembre</option>
-            <option value="Octubre">Octubre</option>
-            <option value="Noviembre">Noviembre</option>
-            <option value="Diciembre">Diciembre</option>
-     
-        </select>
-    </form>
-    <div id='cajaIngenieros'>
-    <h3 style="color: #1a73e8;">Asignación múltiple</h3>
-    <mat-form-field class="example-chip-list" appearance="outline">
-      <mat-chip-grid #chipGrid aria-label="Selección de ingenieros">
-        <mat-chip-row
-          *ngFor="let ing of selectedIngenieros" 
-          [removable]="true" 
-          (removed)="remove(ing)">
-          {{ing}}
-          <button matChipRemove>  ✖
-          </button>
-        </mat-chip-row>
-        <input 
-          placeholder="Buscar ingeniero"
-          #ingenieroInput
-          [formControl]="ingenieroCtrl"
-          [matAutocomplete]="auto"
-          [matChipInputFor]="chipGrid">
-      </mat-chip-grid>
-      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
-        <mat-option *ngFor="let ingeniero of filteredIngenieros | async" [value]="ingeniero">
-          {{ingeniero}}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
-  </div>
+      <div class="card-body">
+        <form [formGroup]="AsignacionTurnoForm" (ngSubmit)="onSubmit()">
+          <!-- Primera fila: Mes y Periodo U -->
+          <div class="row gx-3 mb-3">
+            <!-- Mes -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <h4 style="color: #1a73e8;">Mes</h4>
+                <select
+                  class="form-select select-mes" 
+                  id="diaInicio"
+                  formControlName="diaInicio">
+                  <option value="">Seleccionar</option>
+                  <option value="lunes">Enero</option>
+                  <option value="martes">Febrero</option>
+                  <option value="miercoles">Marzo</option>
+                  <option value="jueves">Abril</option>
+                  <option value="viernes">Mayo</option>
+                  <option value="sabado">Junio</option>
+                  <option value="domingo">Julio</option>
+                  <option value="domingo">Agosto</option>
+                </select>
+              </div>
+            </div>
 
-    </div>
+        <!-- Turnos -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <h4 style="color: #1a73e8;">Turnos</h4>
+            <select
+              class="form-select"
+              formControlName="turno">
+              <option value="">Seleccionar</option>
+              <ng-container *ngIf="codigo.length > 0">
+              <option value="" *ngFor="let item of codigo">{{item.codigo}}</option>
+            </ng-container>
+            </select>
+          </div>
+        </div>
+          </div>
+
+          <!-- Segunda fila: Asignación múltiple y Turnos -->
+          <div class="row gx-3 mb-3">
+            <!-- Asignación múltiple -->
+            <div class="col-md-6">
+              <h4 style="color: #1a73e8;">Asignación múltiple</h4>
+              <mat-form-field class="example-chip-list w-100" appearance="fill">
+                <mat-label>Buscar ingeniero</mat-label>
+                <mat-chip-grid #chipList aria-label="Seleccionar ingenieros">
+                  <mat-chip
+                    *ngFor="let ingeniero of selectedIngenieros"
+                    [removable]="true"
+                    (removed)="remove(ingeniero)">
+                    {{ ingeniero }}
+                    <mat-icon matChipRemove>cancel</mat-icon>
+                  </mat-chip>
+                  <input
+                    placeholder="Agregar"
+                    #ingenieroInput
+                    [formControl]="ingenieroCtrl"
+                    [matAutocomplete]="auto"
+                    [matChipInputFor]="chipList" />
+                </mat-chip-grid>
+                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+                  <mat-option *ngFor="let ing of filteredIngenieros | async" [value]="ing">
+                    {{ ing }}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+            </div>
+
+              <!-- Periodo U -->
+              <div class="col-md-6">
+                <h4 style="color: #1a73e8;">Periodo U</h4>
+                <mat-form-field appearance="fill" class="w-100">
+                  <mat-label>Seleccionar rango de fechas</mat-label>
+                  <mat-date-range-input [rangePicker]="pickerU" [disabled]="false">
+                    <input matStartDate formControlName="fechaInicioU" placeholder="Fecha inicio">
+                    <input matEndDate formControlName="fechaFinU" placeholder="Fecha fin">
+                  </mat-date-range-input>
+                  <mat-datepicker-toggle matSuffix [for]="pickerU"></mat-datepicker-toggle>
+                  <mat-date-range-picker #pickerU></mat-date-range-picker>
+                </mat-form-field>
+              </div>
+          </div>
+          <!--botnon -->
+          <div class="text-center mt-4">
+            <button
+              type="submit"
+              class="btn btn-primary"
+
+            >
+              {{ editandoTurno ? "Actualizar" : "Agregar" }}
+            </button>
+            <button
+              *ngIf="editandoTurno"
+              type="button"
+              class="btn btn-secondary ms-2"
+              
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div> <!-- cierre de card-body -->
+    </div> <!-- cierre de card -->
+  </div> <!-- cierre de turno-form-container -->
+</div> <!-- cierre de registro-container -->
