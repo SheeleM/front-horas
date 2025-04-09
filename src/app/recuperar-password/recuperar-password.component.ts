@@ -1,3 +1,4 @@
+import { RecuperarPasswordService } from './services/recuperar-password.service';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -23,7 +24,8 @@ export class RecuperarPasswordComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private axiosService: AxiosService,
-    private router: Router
+    private router: Router,
+    private recuperarPasswordService:RecuperarPasswordService
   ) {
     this.recuperarForm = this.fb.group({
       cedula: ['', [Validators.required, Validators.minLength(5)]],
@@ -62,15 +64,17 @@ export class RecuperarPasswordComponent implements OnInit {
     this.securityQuestion = 'Cargando pregunta...';
     
     try {
-      const response = await this.axiosService.get(`/user/security-question?cedula=${encodeURIComponent(cedula)}`);
-      console.error('Respuesta del servidor:',response)
-      console.error('response.data:',response.data)
-      console.error('response.data.successresponse.data.success',response.data.success)
-      if (response && response.data && response.data.success) {
-        this.securityQuestion = response.data.question || '¿Cuál es tu pregunta de seguridad?';
+      console.log('cedula-->', cedula)
+      this.recuperarPasswordService.getByCedula(cedula).subscribe((data:any)=>{
+
+      if (data.success) {
+        this.securityQuestion = data.question || '¿Cuál es tu pregunta de seguridad?';
       } else {
         this.securityQuestion = 'No se encontró pregunta para esta cédula';
       }
+      })
+    //  const response = await this.axiosService.get(`/user/security-question?cedula=${encodeURIComponent(cedula)}`);
+  
     } catch (error) {
       console.error('Error al cargar pregunta de seguridad:', error);
       this.securityQuestion = 'Error al cargar la pregunta';

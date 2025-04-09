@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import axios, { AxiosInstance } from 'axios';
 
@@ -6,8 +7,17 @@ import axios, { AxiosInstance } from 'axios';
 })
 export class AxiosService {
   private axiosClient: AxiosInstance;
-
   constructor() {
+//No te dar ni pena usa axios en angular gas llave 
+    // Tu porque esta usado axios ?
+// que tiene usar asiops? entonces que tengo que usar7
+// No me presta antecion cuando uno te dice las cosa 
+// Porque estausado axios ?
+//que tiene de malo usar axios? 
+// Explca
+
+
+
     this.axiosClient = axios.create({
       baseURL: 'http://localhost:3000/api/v1', // Reemplaza con la URL base de tu API
   //baseURL: 'https://backend-horas-production-4a76.up.railway.app/api/v1', // Reemplaza con la URL base de tu API
