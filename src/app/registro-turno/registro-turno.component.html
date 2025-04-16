@@ -9,109 +9,209 @@
 
       <div class="card-body">
         <form [formGroup]="AsignacionTurnoForm" (ngSubmit)="onSubmit()">
-          <!-- Primera fila: Mes y Periodo U -->
+          <!-- Primera fila: Mes y Turnos -->
           <div class="row gx-3 mb-3">
             <!-- Mes -->
             <div class="col-md-6">
-              <div class="form-group">
-                <h4 style="color: #1a73e8;">Mes</h4>
-                <select
-                  class="form-select select-mes" 
-                  id="diaInicio"
-                  formControlName="diaInicio">
-                  <option value="">Seleccionar</option>
-                  <option value="lunes">Enero</option>
-                  <option value="martes">Febrero</option>
-                  <option value="miercoles">Marzo</option>
-                  <option value="jueves">Abril</option>
-                  <option value="viernes">Mayo</option>
-                  <option value="sabado">Junio</option>
-                  <option value="domingo">Julio</option>
-                  <option value="domingo">Agosto</option>
-                </select>
+              <div class="form-field-container">
+                <h4 class="field-label">Mes</h4>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select formControlName="mes">
+                    <mat-option value="">Seleccionar</mat-option>
+                    <mat-option value="enero">Enero</mat-option>
+                    <mat-option value="febrero">Febrero</mat-option>
+                    <mat-option value="marzo">Marzo</mat-option>
+                    <mat-option value="abril">Abril</mat-option>
+                    <mat-option value="mayo">Mayo</mat-option>
+                    <mat-option value="junio">Junio</mat-option>
+                    <mat-option value="julio">Julio</mat-option>
+                    <mat-option value="agosto">Agosto</mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
             </div>
 
-        <!-- Turnos -->
-        <div class="col-md-6">
-          <div class="form-group">
-            <h4 style="color: #1a73e8;">Turnos</h4>
-            <select
-              class="form-select"
-              formControlName="turno">
-              <option value="">Seleccionar</option>
-              <ng-container *ngIf="codigo.length > 0">
-              <option value="" *ngFor="let item of codigo">{{item.codigo}}</option>
-            </ng-container>
-            </select>
-          </div>
-        </div>
+            <!-- Turnos -->
+            <div class="col-md-6">
+              <div class="form-field-container">
+                <h4 class="field-label">Turnos</h4>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select formControlName="turno">
+                    <mat-option value="">Seleccionar</mat-option>
+                    <ng-container *ngIf="codigo && codigo.length > 0">
+                      <mat-option *ngFor="let item of codigo" [value]="item.idTurno">
+                        {{ item.codigo }}
+                      </mat-option>
+                    </ng-container>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
           </div>
 
-          <!-- Segunda fila: Asignación múltiple y Turnos -->
+          <!-- Segunda fila: Asignación múltiple y Periodo U -->
           <div class="row gx-3 mb-3">
             <!-- Asignación múltiple -->
             <div class="col-md-6">
-              <h4 style="color: #1a73e8;">Asignación múltiple</h4>
-              <mat-form-field class="example-chip-list w-100" appearance="fill">
-                <mat-label>Buscar ingeniero</mat-label>
-                <mat-chip-grid #chipList aria-label="Seleccionar ingenieros">
-                  <mat-chip
-                    *ngFor="let ingeniero of selectedIngenieros"
-                    [removable]="true"
-                    (removed)="remove(ingeniero)">
-                    {{ ingeniero }}
-                    <mat-icon matChipRemove>cancel</mat-icon>
-                  </mat-chip>
-                  <input
-                    placeholder="Agregar"
-                    #ingenieroInput
-                    [formControl]="ingenieroCtrl"
-                    [matAutocomplete]="auto"
-                    [matChipInputFor]="chipList" />
-                </mat-chip-grid>
-                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
-                  <mat-option *ngFor="let ing of filteredIngenieros | async" [value]="ing">
-                    {{ ing }}
-                  </mat-option>
-                </mat-autocomplete>
-              </mat-form-field>
+              <div class="form-field-container">
+                <h4 class="field-label">Asignación múltiple</h4>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Buscar ingeniero</mat-label>
+                  <mat-chip-grid #chipList aria-label="Seleccionar ingenieros"  formControlName="ingenierosAsignados"> 
+                    
+                    <mat-chip
+                      *ngFor="let ingeniero of selectedIngenieros"
+                      [removable]="true"
+                      (removed)="remove(ingeniero)">
+                      {{ ingeniero.fullname }}
+                      <mat-icon matChipRemove>cancel</mat-icon>
+                    </mat-chip>
+                    <input
+                      matInput
+                      placeholder="Agregar"
+                      #ingenieroInput
+                      [formControl]="ingenieroCtrl"
+                      [matAutocomplete]="auto"
+                      [matChipInputFor]="chipList" />
+                  </mat-chip-grid>
+                  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+                    <mat-option *ngFor="let ing of filteredIngenieros | async" [value]="ing">
+                      {{ ing.fullname }}
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
             </div>
 
-              <!-- Periodo U -->
-              <div class="col-md-6">
-                <h4 style="color: #1a73e8;">Periodo U</h4>
-                <mat-form-field appearance="fill" class="w-100">
+            <!-- Periodo U -->
+            <div class="col-md-6">
+              <div class="form-field-container">
+                <h4 class="field-label">Periodo U</h4>
+                <mat-form-field appearance="outline" class="w-100">
                   <mat-label>Seleccionar rango de fechas</mat-label>
-                  <mat-date-range-input [rangePicker]="pickerU" [disabled]="false">
-                    <input matStartDate formControlName="fechaInicioU" placeholder="Fecha inicio">
-                    <input matEndDate formControlName="fechaFinU" placeholder="Fecha fin">
+                  <mat-date-range-input [rangePicker]="pickerU">
+                    <input matStartDate formControlName="fechaInicio" placeholder="Fecha inicio" />
+                    <input matEndDate formControlName="fechaFin" placeholder="Fecha fin" />
                   </mat-date-range-input>
                   <mat-datepicker-toggle matSuffix [for]="pickerU"></mat-datepicker-toggle>
                   <mat-date-range-picker #pickerU></mat-date-range-picker>
                 </mat-form-field>
               </div>
+            </div>
           </div>
-          <!--botnon -->
+
+          <!-- Botones -->
           <div class="text-center mt-4">
             <button
               type="submit"
-              class="btn btn-primary"
-
-            >
+              mat-raised-button
+              color="primary"
+              class="action-button">
               {{ editandoTurno ? "Actualizar" : "Agregar" }}
             </button>
             <button
               *ngIf="editandoTurno"
               type="button"
-              class="btn btn-secondary ms-2"
-              
-            >
+              mat-raised-button
+              color="warn"
+              class="action-button ms-3">
               Cancelar
             </button>
           </div>
         </form>
-      </div> <!-- cierre de card-body -->
-    </div> <!-- cierre de card -->
-  </div> <!-- cierre de turno-form-container -->
-</div> <!-- cierre de registro-container -->
+      </div>
+
+<!--tabla -->
+<div class="table-container">
+  <mat-tab-group>
+    <mat-tab label="Semana 1 (01-07)">
+      <table mat-table class="mat-elevation-z8 full-width">
+        <ng-container matColumnDef="ingeniero">
+          <th mat-header-cell *matHeaderCellDef> Ingenierosito </th>
+          <td mat-cell *matCellDef="let row"> {{ row.ingeniero }} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['ingeniero']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['ingeniero']"></tr>
+      </table>
+    </mat-tab>
+
+    <mat-tab label="Semana 2 (08-14)"></mat-tab>
+    <mat-tab label="Semana 3 (15-21)"></mat-tab>
+    <mat-tab label="Semana 4 (22-31)"></mat-tab>
+  </mat-tab-group>
+</div>
+
+<!---tala2-->
+<div class="card-body p-0">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr class="text-center">
+          <th scope="col">Ingeniero</th>
+          <th scope="col">Fecha Inicio</th>
+          <th scope="col">Fecha Fin</th>
+          <th scope="col">Turno</th>
+          <th scope="col">Días</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Fila 1 -->
+        <tr class="bg-light-blue text-center">
+          <td>Ana Torres</td>
+          <td>2024-04-01</td>
+          <td>2024-04-05</td>
+          <td>TM</td>
+          <td>Lunes a Viernes</td>
+          <td>
+            <button class="btn btn-sm btn-icon me-2">
+              <i class="fas fa-pencil-alt"></i>
+            </button>
+            <button class="btn btn-sm btn-icon">
+              <i class="fas fa-times"></i>
+            </button>
+          </td>
+        </tr>
+        <!-- Fila 2 -->
+        <tr class="bg-light-blue text-center">
+          <td>Marco Ruiz</td>
+          <td>2024-04-03</td>
+          <td>2024-04-06</td>
+          <td>TN</td>
+          <td>Miércoles a Sábado</td>
+          <td>
+            <button class="btn btn-sm btn-icon me-2">
+              <i class="fas fa-pencil-alt"></i>
+            </button>
+            <button class="btn btn-sm btn-icon">
+              <i class="fas fa-times"></i>
+            </button>
+          </td>
+        </tr>
+        <!-- Fila 3 -->
+        <tr class="bg-light-blue text-center">
+          <td>Luis Pérez</td>
+          <td>2024-04-10</td>
+          <td>2024-04-14</td>
+          <td>TD</td>
+          <td>Miércoles a Domingo</td>
+          <td>
+            <button class="btn btn-sm btn-icon me-2">
+              <i class="fas fa-pencil-alt"></i>
+            </button>
+            <button class="btn btn-sm btn-icon">
+              <i class="fas fa-times"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+    </div>
+  </div>
+</div>
