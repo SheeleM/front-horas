@@ -13,60 +13,62 @@
           <div class="row gx-3 mb-3">
             <!-- Mes -->
             <div class="col-md-6">
-              <div class="form-field-container">
-                <h4 class="field-label">Mes</h4>
-                <mat-form-field appearance="outline" class="w-100">
-                  <mat-select formControlName="mes">
-                    <mat-option value="">Seleccionar</mat-option>
-                    <mat-option value="enero">Enero</mat-option>
-                    <mat-option value="febrero">Febrero</mat-option>
-                    <mat-option value="marzo">Marzo</mat-option>
-                    <mat-option value="abril">Abril</mat-option>
-                    <mat-option value="mayo">Mayo</mat-option>
-                    <mat-option value="junio">Junio</mat-option>
-                    <mat-option value="julio">Julio</mat-option>
-                    <mat-option value="agosto">Agosto</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-            </div>
-
-            <!-- Turnos -->
-            <div class="col-md-6">
-              <div class="form-field-container">
-                <h4 class="field-label">Turnos</h4>
-                <mat-form-field appearance="outline" class="w-100">
-                  <mat-select formControlName="turno">
-                    <mat-option value="">Seleccionar</mat-option>
-                    <ng-container *ngIf="codigo && codigo.length > 0">
-                      <mat-option *ngFor="let item of codigo" [value]="item.idTurno">
-                        {{ item.codigo }}
-                      </mat-option>
-                    </ng-container>
-                  </mat-select>
-                </mat-form-field>
-              </div>
+              <div class="form-group">
+                <label for="diaInicio">Mes</label>
+                <select class="form-select" id="mes" formControlName="mes">
+                  <option value="">Seleccionar</option>
+                  <option *ngFor="let mes of nombresMeses; let i = index" [value]="i">{{ mes }}</option>
+                </select>
+          
+             <!--- <small class="text-danger" >
+                Seleccione el mes
+              </small>--->
             </div>
           </div>
+               
+            <!-- Turnos -->
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="diaInicio">Turnos</label>
+                <select
+                  class="form-select"
+                  id="diaInicio"
+                  formControlName="turno"
+                >
+                  <option value="">Seleccionar</option>
+                  <ng-container *ngIf="codigo && codigo.length > 0">
+                    <option *ngFor="let item of codigo" [value]="item.idTurno">
+                      {{ item.codigo }}
+                    </option>
+                  </ng-container>
+                </select>
+              </div>
+            </div>
+            
+          </div>
+          
 
           <!-- Segunda fila: Asignación múltiple y Periodo U -->
           <div class="row gx-3 mb-3">
             <!-- Asignación múltiple -->
-            <div class="col-md-6">
-              <div class="form-field-container">
-                <h4 class="field-label">Asignación múltiple</h4>
-                <mat-form-field appearance="outline" class="w-100">
-                  <mat-label>Buscar ingeniero</mat-label>
-                  <mat-chip-grid #chipList aria-label="Seleccionar ingenieros"  formControlName="ingenierosAsignados"> 
-                    
-                    <mat-chip
+            <div class="col-md-6"> 
+              <div class="form-group">
+                <label for="diaInicio">Asignación múltiple</label>  
+                <mat-form-field  class="w-100 yellow-bordered-field">
+                  <mat-chip-grid 
+                    #chipList 
+                    aria-label="Seleccionar ingenieros"  
+                    formControlName="ingenierosAsignados"
+                  > 
+                    <mat-chip id="asignacionM"
                       *ngFor="let ingeniero of selectedIngenieros"
                       [removable]="true"
-                      (removed)="remove(ingeniero)">
+                      (removed)="remove(ingeniero)"
+                    >
                       {{ ingeniero.fullname }}
                       <mat-icon matChipRemove>cancel</mat-icon>
                     </mat-chip>
-                    <input
+                    <input 
                       matInput
                       placeholder="Agregar"
                       #ingenieroInput
@@ -74,6 +76,7 @@
                       [matAutocomplete]="auto"
                       [matChipInputFor]="chipList" />
                   </mat-chip-grid>
+            
                   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
                     <mat-option *ngFor="let ing of filteredIngenieros | async" [value]="ing">
                       {{ ing.fullname }}
@@ -82,14 +85,14 @@
                 </mat-form-field>
               </div>
             </div>
-
+            
             <!-- Periodo U -->
             <div class="col-md-6">
-              <div class="form-field-container">
-                <h4 class="field-label">Periodo U</h4>
-                <mat-form-field appearance="outline" class="w-100">
-                  <mat-label>Seleccionar rango de fechas</mat-label>
-                  <mat-date-range-input [rangePicker]="pickerU">
+              <div class="form-group"  >
+                <label for="diaInicio">Periodo U</label>  
+                <mat-form-field  class="w-100 blue-bordered-field" >
+                <!-- <mat-label>Seleccionar rango de fechas</mat-label>--> 
+                  <mat-date-range-input [rangePicker]="pickerU"  >
                     <input matStartDate formControlName="fechaInicio" placeholder="Fecha inicio" />
                     <input matEndDate formControlName="fechaFin" placeholder="Fecha fin" />
                   </mat-date-range-input>
@@ -121,28 +124,20 @@
         </form>
       </div>
 
-<!--tabla -->
-<div class="table-container">
-  <mat-tab-group>
-    <mat-tab label="Semana 1 (01-07)">
-      <table mat-table class="mat-elevation-z8 full-width">
-        <ng-container matColumnDef="ingeniero">
-          <th mat-header-cell *matHeaderCellDef> Ingenierosito </th>
-          <td mat-cell *matCellDef="let row"> {{ row.ingeniero }} </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="['ingeniero']"></tr>
-        <tr mat-row *matRowDef="let row; columns: ['ingeniero']"></tr>
-      </table>
-    </mat-tab>
-
-    <mat-tab label="Semana 2 (08-14)"></mat-tab>
-    <mat-tab label="Semana 3 (15-21)"></mat-tab>
-    <mat-tab label="Semana 4 (22-31)"></mat-tab>
-  </mat-tab-group>
-</div>
-
-<!---tala2-->
+      <!---
+      <div class="table-container">
+        <mat-tab-group>
+          <mat-tab label="Semana 1 (01-07)">
+         
+          </mat-tab>
+      
+          <mat-tab label="Semana 2 (08-14)"></mat-tab>
+          <mat-tab label="Semana 3 (15-21)"></mat-tab>
+          <mat-tab label="Semana 4 (22-31)"></mat-tab>
+        </mat-tab-group>
+      </div>
+-->
+<!---tala2---
 <div class="card-body p-0">
   <div class="table-responsive">
     <table class="table table-hover mb-0">
@@ -157,7 +152,6 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Fila 1 -->
         <tr class="bg-light-blue text-center">
           <td>Ana Torres</td>
           <td>2024-04-01</td>
@@ -173,7 +167,6 @@
             </button>
           </td>
         </tr>
-        <!-- Fila 2 -->
         <tr class="bg-light-blue text-center">
           <td>Marco Ruiz</td>
           <td>2024-04-03</td>
@@ -189,7 +182,6 @@
             </button>
           </td>
         </tr>
-        <!-- Fila 3 -->
         <tr class="bg-light-blue text-center">
           <td>Luis Pérez</td>
           <td>2024-04-10</td>
@@ -210,8 +202,45 @@
   </div>
 </div>
 
-
-
+-->
+<!--aqui comienza la logica para filtrar el mes en la tabla -->
+ <!-- Formulario de filtrado para la tabla (AsignacionTurnoFormMes) -->
+<!-- Formulario de filtrado para la tabla -->
+<!-- Formulario de filtrado para configurar las pestañas -->
+<div class="card-body">
+  <form [formGroup]="AsignacionTurnoFormMes">
+    <div class="col-md-6">
+      <div class="form-group">
+        <label for="mes">Mes</label>
+        <select class="form-select" id="mes" formControlName="mes">
+          <option value="">Seleccionar</option>
+          <option *ngFor="let mes of nombresMeses; let i = index" [value]="i">
+            {{ mes }}
+          </option>
+        </select>
+      </div>
     </div>
-  </div>
+  </form>
 </div>
+
+<!-- Mat Tab Group con pestañas generadas dinámicamente -->
+<mat-tab-group *ngIf="cabeceras.length > 0">
+  <mat-tab *ngFor="let header of cabeceras" [label]="header">
+    <!-- Aquí puedes colocar el contenido específico para cada semana -->
+    <div class="tab-content">
+      Contenido de {{ header }}
+    </div>
+  </mat-tab>
+</mat-tab-group>
+
+
+
+
+</div>
+</div>
+</div>
+
+
+
+
+
