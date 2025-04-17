@@ -75,6 +75,39 @@ export interface CreateUsuarioTurnoDto {
 
 
 export class RegistroTurnoComponent implements OnInit {
+
+  anio: number = 2025; // 🔥 Año quemado
+  diasPorMes: number[] = [ // 🔥 Días por cada mes quemado
+    31, // Enero
+    28, // Febrero (2024 es bisiesto)
+    31, // Marzo
+    30, // Abril
+    31, // Mayo
+    30, // Junio
+    31, // Julio
+    31, // Agosto
+    30, // Septiembre
+    31, // Octubre
+    30, // Noviembre
+    31  // Diciembre
+  ];
+
+  nombresMeses: string[] = [
+    'Enero', 'Febrero', 'Marzo', 'Abril',
+    'Mayo', 'Junio', 'Julio', 'Agosto',
+    'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+  resultados: { mes: string, semanas: number }[] = [];
+  semanaSeleccionada: number | null = null;
+
+  // Formulario para la asignación
+  AsignacionTurnoForm!: FormGroup;
+  AsignacionTurnoFormMes!: FormGroup;
+
+// Resultados se usaba para mostrar mes y semanas; ahora usaremos "cabeceras"
+cabeceras: string[] = [];
+
+/////fin 
   turnosPaginados = [
     {
       idTurno: 1,
@@ -106,7 +139,6 @@ export class RegistroTurnoComponent implements OnInit {
     return item.idTurno;
   }
 
-  AsignacionTurnoForm!: FormGroup;
   fechaSeleccionada = new FormControl();
   editandoTurno: boolean = false;
   codigo: any[] = [];
@@ -170,6 +202,56 @@ export class RegistroTurnoComponent implements OnInit {
       turno: [''],
       periodo: [''],
     });
+       // Inicialización del formulario de filtrado para la tabla
+       this.AsignacionTurnoFormMes = this.fb.group({
+        mes: ['', Validators.required],
+      });
+  
+ // Al cambiar el mes se recalcula la cantidad de semanas y se genera el arreglo de labels
+ this.AsignacionTurnoFormMes.get('mes')?.valueChanges.subscribe((mesIndexStr: string) => {
+  const index = Number(mesIndexStr);
+  if (mesIndexStr && !isNaN(index)) {
+    const semanas = this.calcularSemanasDelMes(index);
+    // Se genera un arreglo dinámico con el label de cada semana
+    this.cabeceras = Array.from({ length: semanas }, (_: any, i: number) => `Semana ${i + 1}`);
+  } else {
+    this.cabeceras = [];
+  }
+});
+  
+
+  }
+
+  calcularSemanasDelMes(mesIndex: number): number {
+    const dias = this.diasPorMes[mesIndex];
+  
+    // Obtenemos el día de la semana del 1° día del mes con getDay()
+    // getDay(): 0 = domingo, 1 = lunes, … 6 = sábado.
+    const fechaInicio = new Date(this.anio, mesIndex, 1);
+    const diaSemana = fechaInicio.getDay();
+  
+    // Convertir a un índice donde lunes = 1, …, domingo = 7
+    const diaInicioLunes = (diaSemana === 0) ? 7 : diaSemana;
+    
+    // Días que entran en la primera semana (de lunes a domingo)
+    const diasPrimeraSemana = 8 - diaInicioLunes;
+    
+    // Restan los días del mes después de la primera semana
+    const diasRestantes = dias - diasPrimeraSemana;
+  
+    // Se cuentan las semanas completas en el resto del mes
+    const semanasCompletas = Math.floor(diasRestantes / 7);
+    const restoDias = diasRestantes % 7;
+  
+    // Si quedan días extra (parcial), se suma una semana adicional.
+    const totalSemanas = 1 + semanasCompletas + (restoDias > 0 ? 1 : 0);
+    return totalSemanas;
+  }
+  
+
+  diaDeLaSemana(dia: number, mes: number, anio: number): number {
+    const fecha = new Date(anio, mes - 1, dia);
+    return fecha.getDay(); // 0 = domingo, ..., 6 = sábado
   }
 
   private _filter(value: string): Ingeniero[] {
