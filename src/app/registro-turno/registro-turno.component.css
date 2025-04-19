@@ -1,4 +1,34 @@
+.acciones-iconos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  gap: 12px;                /* Espacio entre botones */
 
+  
+}
+
+.acciones-iconos .mat-icon-button {
+  min-width: 28px;
+  height: 50px;
+  width: 28px;
+  padding: 0;
+}
+
+.acciones-iconos .mat-icon {
+  line-height: 16px;
+
+}
+
+.boton-editar {
+  background-color: #4a90e2; /* Amarillo suave */
+  color: #f8f7f6;            /* Amarillo fuerte */
+}
+
+.boton-eliminar {
+  background-color: #ef5350; /* Gris claro */
+  color: #fdfdfd;            /* Negro suave */
+}
 
 
 

@@ -9,6 +9,7 @@
 
       <div class="card-body">
         <form [formGroup]="AsignacionTurnoForm" (ngSubmit)="onSubmit()">
+          {{ editandoTurno ? 'Actualizar' : 'Guardar' }}
           <!-- Primera fila: Mes y Turnos -->
           <div class="row gx-3 mb-3">
             <!-- Mes -->
@@ -33,7 +34,7 @@
                 <select
                   class="form-select"
                   id="diaInicio"
-                  formControlName="turno"
+                  formControlName="turnoFK"
                 >
                   <option value="">Seleccionar</option>
                   <ng-container *ngIf="codigo && codigo.length > 0">
@@ -117,92 +118,19 @@
               type="button"
               mat-raised-button
               color="warn"
-              class="action-button ms-3">
+              class="action-button ms-3"
+              (click)="cancelarEdicion()">
+
+              >
+
               Cancelar
             </button>
           </div>
         </form>
       </div>
 
-      <!---
-      <div class="table-container">
-        <mat-tab-group>
-          <mat-tab label="Semana 1 (01-07)">
-         
-          </mat-tab>
-      
-          <mat-tab label="Semana 2 (08-14)"></mat-tab>
-          <mat-tab label="Semana 3 (15-21)"></mat-tab>
-          <mat-tab label="Semana 4 (22-31)"></mat-tab>
-        </mat-tab-group>
-      </div>
--->
-<!---tala2---
-<div class="card-body p-0">
-  <div class="table-responsive">
-    <table class="table table-hover mb-0">
-      <thead class="table-light">
-        <tr class="text-center">
-          <th scope="col">Ingeniero</th>
-          <th scope="col">Fecha Inicio</th>
-          <th scope="col">Fecha Fin</th>
-          <th scope="col">Turno</th>
-          <th scope="col">Días</th>
-          <th scope="col">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="bg-light-blue text-center">
-          <td>Ana Torres</td>
-          <td>2024-04-01</td>
-          <td>2024-04-05</td>
-          <td>TM</td>
-          <td>Lunes a Viernes</td>
-          <td>
-            <button class="btn btn-sm btn-icon me-2">
-              <i class="fas fa-pencil-alt"></i>
-            </button>
-            <button class="btn btn-sm btn-icon">
-              <i class="fas fa-times"></i>
-            </button>
-          </td>
-        </tr>
-        <tr class="bg-light-blue text-center">
-          <td>Marco Ruiz</td>
-          <td>2024-04-03</td>
-          <td>2024-04-06</td>
-          <td>TN</td>
-          <td>Miércoles a Sábado</td>
-          <td>
-            <button class="btn btn-sm btn-icon me-2">
-              <i class="fas fa-pencil-alt"></i>
-            </button>
-            <button class="btn btn-sm btn-icon">
-              <i class="fas fa-times"></i>
-            </button>
-          </td>
-        </tr>
-        <tr class="bg-light-blue text-center">
-          <td>Luis Pérez</td>
-          <td>2024-04-10</td>
-          <td>2024-04-14</td>
-          <td>TD</td>
-          <td>Miércoles a Domingo</td>
-          <td>
-            <button class="btn btn-sm btn-icon me-2">
-              <i class="fas fa-pencil-alt"></i>
-            </button>
-            <button class="btn btn-sm btn-icon">
-              <i class="fas fa-times"></i>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+     
 
--->
 <!--aqui comienza la logica para filtrar el mes en la tabla -->
  <!-- Formulario de filtrado para la tabla (AsignacionTurnoFormMes) -->
 <!-- Formulario de filtrado para la tabla -->
@@ -224,14 +152,41 @@
 </div>
 
 <!-- Mat Tab Group con pestañas generadas dinámicamente -->
-<mat-tab-group *ngIf="cabeceras.length > 0">
-  <mat-tab *ngFor="let header of cabeceras" [label]="header">
-    <!-- Aquí puedes colocar el contenido específico para cada semana -->
-    <div class="tab-content">
-      Contenido de {{ header }}
+<mat-tab-group *ngIf="usuarioTurnosPorSemana.length > 0">
+  <mat-tab *ngFor="let semana of usuarioTurnosPorSemana; let i = index" [label]="'Semana ' + (i + 1)">
+    <div class="table-responsive">
+      <table class="table table-hover text-center">
+        <thead class="table-light">
+          <tr>
+            <th>Ingeniero</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Turno</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let turno of semana" >
+            <td>{{ turno.fullname }}</td>
+            <td>{{ turno.fechaInicio | date: 'shortDate' }}</td>
+            <td>{{ turno.fechaFin | date: 'shortDate' }}</td>
+            <td>{{ turno.codigo }}</td>
+            <td>
+              <button mat-icon-button class="boton-editar" aria-label="Editar" (click)="editarTurno(turno)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="boton-eliminar" aria-label="Eliminar" (click)="eliminarTurno(turno.idUsuarioTurno)" >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </mat-tab>
 </mat-tab-group>
+
+
 
 
 
