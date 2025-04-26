@@ -34,7 +34,6 @@ export interface Ingeniero {
 }
 
 export interface CreateUsuarioTurnoDto {
-  mes: number;
   turnoFK: number;
   usuarioFK: number;
   fechaInicio: Date;
@@ -177,7 +176,6 @@ export class RegistroTurnoComponent implements OnInit {
 
   inicializarFormulario(): void {
     this.AsignacionTurnoForm = this.fb.group({
-      mes: ['', Validators.required],
       turnoFK: ['', Validators.required],
       ingenierosAsignados: [[], Validators.required], // 👈 Este es nuevo
       fechaInicio: [null, Validators.required],
@@ -187,7 +185,6 @@ export class RegistroTurnoComponent implements OnInit {
 
   ngOnInit(): void {
     this.AsignacionTurnoForm = this.fb.group({
-      mes: [''],
       fechaInicio: [''],
       fechaFin: [''],
       turnoFK: [''],
@@ -349,14 +346,6 @@ export class RegistroTurnoComponent implements OnInit {
     } else {
       this.guardarTurno();
     }
-  
-    /*
-    if (this.editandoTurno) {
-      //  this.actualizarTurnoUsuario();
-    } else {
-      this.guardarTurno();
-      console.log('entro al guardar turno');
-    }*/
   }
 
   // Métodos para mostrar notificaciones
@@ -370,8 +359,6 @@ export class RegistroTurnoComponent implements OnInit {
   }
   resetForm(): void {
     this.AsignacionTurnoForm.reset();
-    //this.editandoTurno = false;
-    //this.turnoEditId = null;
   }
 
   guardarTurno() {
@@ -400,10 +387,6 @@ export class RegistroTurnoComponent implements OnInit {
       }
 
       // Obtener los valores comunes del formulario
-      const mes = this.AsignacionTurnoForm.value.mes;
-      console.log('MEEEEEEEEEEEEES ', mes);
-      const mesHumano = Number(mes) + 1;
-
       const turnoFK = Number(this.AsignacionTurnoForm.value.turnoFK);
       const fechaInicio = this.AsignacionTurnoForm.value.fechaInicio;
       const fechaFin = this.AsignacionTurnoForm.value.fechaFin;
@@ -416,7 +399,6 @@ export class RegistroTurnoComponent implements OnInit {
       // Para cada ingeniero seleccionado, crear un registro de turno
       this.selectedIngenieros.forEach((ingeniero) => {
         const nuevoTurno: CreateUsuarioTurnoDto = {
-          mes: mesHumano,
           turnoFK: turnoFK,
           usuarioFK: ingeniero.id, // Usar el ID del ingeniero actual
           fechaInicio: fechaInicio,
@@ -549,7 +531,6 @@ export class RegistroTurnoComponent implements OnInit {
     const turnoEncontrado = this.codigo.find(t => t.codigo === turno.codigo);
   
     this.AsignacionTurnoForm.patchValue({
-      mes: new Date(turno.fechaInicio).getMonth(),
       fechaInicio: new Date(turno.fechaInicio),
       fechaFin: new Date(turno.fechaFin),
       turnoFK: turnoEncontrado ? turnoEncontrado.idTurno : null
@@ -590,14 +571,9 @@ export class RegistroTurnoComponent implements OnInit {
     return turno ? turno.id : null;
   }
 
-
-
- 
   actualizarTurnoUsuario() {
     if (!this.turnoEditId) return;
 
-    const mes = this.AsignacionTurnoForm.value.mes;
-    const mesHumano = Number(mes) + 1;
     const turnoFK = Number(this.AsignacionTurnoForm.value.turnoFK);
     const fechaInicio = this.AsignacionTurnoForm.value.fechaInicio;
     const fechaFin = this.AsignacionTurnoForm.value.fechaFin;
@@ -606,9 +582,8 @@ export class RegistroTurnoComponent implements OnInit {
 
     const turnoActualizado = {
       idUsuarioTurno: Number(this.turnoEditId),
-      mes: mesHumano,
       turnoFK: turnoFK,
-      usuarioFK: Number(ingeniero.id), // <--- Aquí capturas el usuarioFK
+      usuarioFK: Number(ingeniero.id),
       fechaInicio: fechaInicio instanceof Date ? fechaInicio.toISOString() : fechaInicio,
       fechaFin: fechaFin instanceof Date ? fechaFin.toISOString() : fechaFin
     };
@@ -634,7 +609,6 @@ export class RegistroTurnoComponent implements OnInit {
       });
   }
 
-  
   cancelarEdicion(): void {
     this.editandoTurno = false;
     this.turnoEditId = null;

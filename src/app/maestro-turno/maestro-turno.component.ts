@@ -4,6 +4,7 @@ import { AxiosService } from '../axios.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { MaestroTurnoService } from './services/maestroTurno.service';
 
 interface Turno {
   idTurno?: number;
@@ -46,7 +47,8 @@ export class MaestroTurnoComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private axiosService: AxiosService,
-    private router: Router
+    private router: Router,
+    private maestroTurnoService: MaestroTurnoService // nuevo servicio inyectado
   ) {
     this.inicializarFormulario();
   }
@@ -68,10 +70,10 @@ export class MaestroTurnoComponent implements OnInit {
 
   async cargarTurnos() {
     try {
-      const response = await this.axiosService.get('/turno');
-      this.turnos = response.data;
-      this.aplicarFiltro();
-      console.log(response);
+      this.maestroTurnoService.getAllTurnos().subscribe((data: any) => {
+        this.turnos = data ?? [];
+        this.aplicarFiltro(); // <-- Agrega esto para actualizar turnosFiltrados
+      });
     } catch (error) {
       this.mostrarError('No se pudieron cargar los turnos');
     }
@@ -83,7 +85,7 @@ export class MaestroTurnoComponent implements OnInit {
       return;
     }
 
-    const turnoData = { ...this.turnoForm.value, };
+    const turnoData = { ...this.turnoForm.value };
     if (turnoData.horaInicio) {
       const [horas, minutos] = turnoData.horaInicio.split(':');
       const horaInicio = new Date();
@@ -98,7 +100,7 @@ export class MaestroTurnoComponent implements OnInit {
       turnoData.horaFin = horaFin.toISOString();
     }
     try {
-      const response = await this.axiosService.post('/turno', turnoData);
+      await this.maestroTurnoService.crearTurno(turnoData).subscribe();
       this.mostrarExito('Turno creado correctamente');
       this.resetForm();
       this.cargarTurnos();
@@ -107,7 +109,7 @@ export class MaestroTurnoComponent implements OnInit {
     }
   }
 
-  async actualizarTurno(): Promise<void> {
+  actualizarTurno(): void {
     if (!this.turnoForm.valid || this.turnoEditId === null) {
       this.markFormGroupTouched(this.turnoForm);
       return;
@@ -130,14 +132,16 @@ export class MaestroTurnoComponent implements OnInit {
       turnoData.horaFin = horaFin.toISOString();
     }
 
-    try {
-      const response = await this.axiosService.put(`/turno/${id}`, turnoData);
-      this.mostrarExito('Turno actualizado correctamente');
-      this.resetForm();
-      this.cargarTurnos();
-    } catch (error) {
-      this.mostrarError('No se pudo actualizar el turno');
-    }
+    this.maestroTurnoService.actualizarTurno(id, turnoData).subscribe({
+      next: () => {
+        this.mostrarExito('Turno actualizado correctamente');
+        this.resetForm();
+        this.cargarTurnos(); // <-- Refresca la tabla dinámicamente
+      },
+      error: () => {
+        this.mostrarError('No se pudo actualizar el turno');
+      }
+    });
   }
 
   onSubmit(): void {
@@ -183,31 +187,33 @@ export class MaestroTurnoComponent implements OnInit {
     console.log('ID del turno en edición:', this.turnoEditId);
   }
 
-  async eliminarTurno(id: number): Promise<void> {
+  eliminarTurno(id: number): void {
     if (id === undefined || id === null) {
       return;
     }
 
-    try {
-      const result = await Swal.fire({
-        title: '¿Estás seguro?',
-        text: "Esta acción no se puede revertir",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar'
-      });
-
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "Esta acción no se puede revertir",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
       if (result.isConfirmed) {
-        await this.axiosService.delete(`/turno/${id}`);
-        this.mostrarExito('El turno ha sido eliminado correctamente');
-        this.cargarTurnos();
+        this.maestroTurnoService.eliminarTurno(id).subscribe({
+          next: () => {
+            this.mostrarExito('El turno ha sido eliminado correctamente');
+            this.cargarTurnos();
+          },
+          error: () => {
+            this.mostrarError('No se pudo eliminar el turno');
+          }
+        });
       }
-    } catch (error) {
-      this.mostrarError('No se pudo eliminar el turno');
-    }
+    });
   }
 
   cancelarEdicion(): void {
