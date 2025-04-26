@@ -5,16 +5,18 @@ import { ListarUsuariosComponent } from './listar-usuarios/listar-usuarios.compo
 import { RecuperarPasswordComponent } from './recuperar-password/recuperar-password.component';
 import { MaestroTurnoComponent } from './maestro-turno/maestro-turno.component';
 import { RegistroTurnoComponent } from './registro-turno/registro-turno.component';
+import { RegistroHorasComponent } from './registro-horas/registro-horas.component';
+import { HammerModule } from '@angular/platform-browser';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
     { path: 'login', component: LoginComponent },
-    { path: 'registro', component: RegistroComponent },
-    { path: 'listarUsuario', component: ListarUsuariosComponent },
-    { path: 'recovery', component: RecuperarPasswordComponent },
-    { path: 'maestroTurno', component: MaestroTurnoComponent },
-    { path: 'RegistroTurno', component: RegistroTurnoComponent }
-
-
+    { path: 'registro', component: RegistroComponent ,   canActivate: [authGuard]},
+    { path: 'listarUsuario', component: ListarUsuariosComponent ,canActivate: [authGuard]},
+    { path: 'recovery', component: RecuperarPasswordComponent ,canActivate: [authGuard]},
+    { path: 'maestroTurno', component: MaestroTurnoComponent ,canActivate: [authGuard]},
+    { path: 'RegistroTurno', component: RegistroTurnoComponent , canActivate: [authGuard]},
+    { path: 'RegistroHora', component: RegistroHorasComponent ,canActivate: [authGuard]}
 
 ];

@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { AxiosService } from '../axios.service';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { listarUsuarioService } from './services/listarUsuario.service';
 
 interface Rol {
   idRol: number;
@@ -38,7 +38,9 @@ export class ListarUsuariosComponent implements OnInit {
   nuevaContrasena: string = '';
   //confirmasContrasena: string = '';
 
-  constructor(private axiosService: AxiosService) {}
+  constructor(
+    private listarUsuarioService: listarUsuarioService,
+  ) {}
 
   abrirPopup(usuario: Usuario) {
     this.usuarioSeleccionado = usuario;
@@ -60,10 +62,7 @@ export class ListarUsuariosComponent implements OnInit {
     });
   }
 
-
-  
-  async asignarContrasena() {
-    console.log('lac edulaaaaaaaaaaaaaaaa',this.usuarioSeleccionado?.cedula)
+  asignarContrasena() {
     if (!this.usuarioSeleccionado) {
       Swal.fire('Error', 'No hay usuario seleccionado', 'error');
       return;
@@ -72,40 +71,33 @@ export class ListarUsuariosComponent implements OnInit {
       Swal.fire('Error', 'La contraseña no puede estar vacía', 'error');
       return;
     }
-    /*if (this.nuevaContrasena !== this.confirmasContrasena) {
-      Swal.fire('Error', 'Las contraseñas no coinciden', 'error');
-      return;
-    }*/
-    try {
-      // llamada al backend para cambiar la contraseña
-      await this.axiosService.post(`/user/update-password-admin`, 
-        {  cedula:this.usuarioSeleccionado.cedula,
-          newPassword: this.nuevaContrasena 
-
-        });
-      
-      Swal.fire(
-        'Actualizado',
-        `La contraseña del usuario ${this.usuarioSeleccionado.fullname} ha sido actualizada`,
-        'success'
-      );
-
-      console.log(`Asignando contraseña al usuario: ${this.usuarioSeleccionado.fullname}`);
-      this.cerrarPopup();
-    } catch (error) {
-      console.error('Error al cambiar la contraseña:', error);
-      Swal.fire(
-        'Error',
-        'No se pudo actualizar la contraseña. Inténtalo de nuevo más tarde.',
-        'error'
-      );
-    }
+    this.listarUsuarioService.asignarContrasena(this.usuarioSeleccionado.cedula, this.nuevaContrasena).subscribe({
+      next: () => {
+        Swal.fire(
+          'Actualizado',
+          `La contraseña del usuario ${this.usuarioSeleccionado!.fullname} ha sido actualizada`,
+          'success'
+        );
+        this.cerrarPopup();
+      },
+      error: (error) => {
+        console.error('Error al cambiar la contraseña:', error);
+        Swal.fire(
+          'Error',
+          'No se pudo actualizar la contraseña. Inténtalo de nuevo más tarde.',
+          'error'
+        );
+      }
+    });
   }
 
   async obtenerRoles() {
     try {
-      const response = await this.axiosService.get<Rol[]>('/rol');
-      this.roles = response.data;
+      this.listarUsuarioService.obtenerRoles().subscribe((response: any) => {
+       // this.roles = response.data;
+        this.roles=response ?? [];
+        //this.usuarios = response ?? [];
+      });
     } catch (error) {
       console.error('Error al obtener roles:', error);
     }
@@ -113,23 +105,28 @@ export class ListarUsuariosComponent implements OnInit {
 
   async obtenerUsuarios() {
     try {
-      const response = await this.axiosService.get<Usuario[]>('/user');
-      this.usuarios = response.data;
-      this.usuarios.forEach(usuario => {
-        if (usuario.rol && usuario.rol.idRol) {
-          const matchedRole = this.roles.find(role => role.idRol === usuario.rol.idRol);
-          if (matchedRole) {
-            usuario.rol = matchedRole;
+      this.listarUsuarioService.obtenerUsuarios().subscribe((response: any) => {
+        console.log('Respuesta de obtenerUsuarios:', response); // <-- Agrega esto temporalmente
+        // Ajusta según la estructura real de la respuesta:
+       // this.usuarios = response.data ?? response ?? [];
+      this.usuarios = response ?? []; //array
+      // this.usuarios = response.data ?? []; //
+        this.usuarios.forEach(usuario => {
+          if (usuario.rol && usuario.rol.idRol) {
+            const matchedRole = this.roles.find(role => role.idRol === usuario.rol.idRol);
+            if (matchedRole) {
+              usuario.rol = matchedRole;
+            }
           }
-        }
-        // Guardar copia del estado original
-        this.usuariosOriginales[usuario.id] = {
-          ...usuario,
-          rol: { ...usuario.rol }
-        };
-        usuario.cambiosPendientes = false;
-        usuario.cambiosEstado = false;
-        usuario.cambiosRol = false;
+          // Guardar copia del estado original
+          this.usuariosOriginales[usuario.id] = {
+            ...usuario,
+            rol: { ...usuario.rol }
+          };
+          usuario.cambiosPendientes = false;
+          usuario.cambiosEstado = false;
+          usuario.cambiosRol = false;
+        });
       });
     } catch (error) {
       console.error('Error al obtener usuarios:', error);
@@ -165,21 +162,32 @@ export class ListarUsuariosComponent implements OnInit {
       };
 
       console.log(datosActualizados);
-      await this.axiosService.put(`/user`, datosActualizados);
-      this.usuariosOriginales[usuario.id] = {
-        ...usuario,
-        rol: { ...usuario.rol }
-      };
+      this.listarUsuarioService.actualizarUsuario(datosActualizados).subscribe({
+        next: () => {
+          this.usuariosOriginales[usuario.id] = {
+            ...usuario,
+            rol: { ...usuario.rol }
+          };
 
-      usuario.cambiosPendientes = false;
-      usuario.cambiosEstado = false;
-      usuario.cambiosRol = false;
+          usuario.cambiosPendientes = false;
+          usuario.cambiosEstado = false;
+          usuario.cambiosRol = false;
 
-      Swal.fire(
-        '¡Actualizado!',
-        `El usuario ${usuario.fullname} ha sido actualizado correctamente.`,
-        'success'
-      );
+          Swal.fire(
+            '¡Actualizado!',
+            `El usuario ${usuario.fullname} ha sido actualizado correctamente.`,
+            'success'
+          );
+        },
+        error: (error) => {
+          console.error('Error al actualizar usuario:', error);
+          Swal.fire(
+            'Error',
+            'No se pudo actualizar el usuario. Inténtalo de nuevo más tarde.',
+            'error'
+          );
+        }
+      });
     } catch (error) {
       console.error('Error al actualizar usuario:', error);
       Swal.fire(

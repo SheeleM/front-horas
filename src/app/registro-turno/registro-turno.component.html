@@ -9,58 +9,62 @@
 
       <div class="card-body">
         <form [formGroup]="AsignacionTurnoForm" (ngSubmit)="onSubmit()">
-          {{ editandoTurno ? 'Actualizar' : 'Guardar' }}
-          <!-- Primera fila: Mes y Turnos -->
-          <div class="row gx-3 mb-3">
-            <!-- Mes -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="diaInicio">Mes</label>
-                <select class="form-select" id="mes" formControlName="mes">
-                  <option value="">Seleccionar</option>
-                  <option *ngFor="let mes of nombresMeses; let i = index" [value]="i">{{ mes }}</option>
-                </select>
-          
-             <!--- <small class="text-danger" >
-                Seleccione el mes
-              </small>--->
-            </div>
-          </div>
-               
-            <!-- Turnos -->
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="diaInicio">Turnos</label>
-                <select
-                  class="form-select"
-                  id="diaInicio"
-                  formControlName="turnoFK"
-                >
-                  <option value="">Seleccionar</option>
-                  <ng-container *ngIf="codigo && codigo.length > 0">
-                    <option *ngFor="let item of codigo" [value]="item.idTurno">
-                      {{ item.codigo }}
-                    </option>
-                  </ng-container>
-                </select>
-              </div>
-            </div>
-            
-          </div>
-          
+          <!-- Primera fila: Turnos y Periodo U alineados -->
+     <!-- Primera fila: Turnos y Periodo U alineados correctamente -->
 
-          <!-- Segunda fila: Asignación múltiple y Periodo U -->
-          <div class="row gx-3 mb-3">
-            <!-- Asignación múltiple -->
-            <div class="col-md-6"> 
+
+    <!-- Primera fila: Turnos y Periodo U alineados correctamente -->
+<div class="row gx-3 mb-3">
+  <!-- Turnos -->
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="diaInicio">Turnos</label>
+      <select
+        class="form-select custom-blue-select"
+        id="diaInicio"
+        formControlName="turnoFK"
+      >
+        <option value="">Seleccionar</option>
+        <ng-container *ngIf="codigo && codigo.length > 0">
+          <option *ngFor="let item of codigo" [value]="item.idTurno">
+            {{ item.codigo }}
+          </option>
+        </ng-container>
+      </select>
+    </div>
+  </div>
+  
+  <!-- Periodo U con borde azul corregido -->
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="periodoU">Periodo U</label>
+      <mat-form-field class="w-100 date-field-fix" appearance="outline">
+        <!-- Eliminamos el mat-label duplicado -->
+        <mat-date-range-input [rangePicker]="pickerU">
+          <input matStartDate formControlName="fechaInicio" placeholder="Fecha inicio" />
+          <input matEndDate formControlName="fechaFin" placeholder="Fecha fin" />
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="pickerU"></mat-datepicker-toggle>
+        <mat-date-range-picker #pickerU></mat-date-range-picker>
+      </mat-form-field>
+    </div>
+  </div>
+</div>
+
+
+
+
+          <!-- Segunda fila: Asignación múltiple ocupa todo el ancho -->
+          <div >
+            <div class="col-12">
               <div class="form-group">
-                <label for="diaInicio">Asignación múltiple</label>  
-                <mat-form-field  class="w-100 yellow-bordered-field">
-                  <mat-chip-grid 
-                    #chipList 
-                    aria-label="Seleccionar ingenieros"  
+                <label for="asignacionM">Asignación múltiple</label>
+                <mat-form-field class="w-100 yellow-bordered-field">
+                  <mat-chip-grid
+                    #chipList
+                    aria-label="Seleccionar ingenieros"
                     formControlName="ingenierosAsignados"
-                  > 
+                  >
                     <mat-chip id="asignacionM"
                       *ngFor="let ingeniero of selectedIngenieros"
                       [removable]="true"
@@ -69,7 +73,7 @@
                       {{ ingeniero.fullname }}
                       <mat-icon matChipRemove>cancel</mat-icon>
                     </mat-chip>
-                    <input 
+                    <input
                       matInput
                       placeholder="Agregar"
                       #ingenieroInput
@@ -77,7 +81,6 @@
                       [matAutocomplete]="auto"
                       [matChipInputFor]="chipList" />
                   </mat-chip-grid>
-            
                   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
                     <mat-option *ngFor="let ing of filteredIngenieros | async" [value]="ing">
                       {{ ing.fullname }}
@@ -86,31 +89,15 @@
                 </mat-form-field>
               </div>
             </div>
-            
-            <!-- Periodo U -->
-            <div class="col-md-6">
-              <div class="form-group"  >
-                <label for="diaInicio">Periodo U</label>  
-                <mat-form-field  class="w-100 blue-bordered-field" >
-                <!-- <mat-label>Seleccionar rango de fechas</mat-label>--> 
-                  <mat-date-range-input [rangePicker]="pickerU"  >
-                    <input matStartDate formControlName="fechaInicio" placeholder="Fecha inicio" />
-                    <input matEndDate formControlName="fechaFin" placeholder="Fecha fin" />
-                  </mat-date-range-input>
-                  <mat-datepicker-toggle matSuffix [for]="pickerU"></mat-datepicker-toggle>
-                  <mat-date-range-picker #pickerU></mat-date-range-picker>
-                </mat-form-field>
-              </div>
-            </div>
           </div>
 
-          <!-- Botones -->
-          <div class="text-center mt-4">
+          <!-- Botones alineados a la derecha -->
+          <div class="agregar-btn-right mt-4 mb-4">
             <button
               type="submit"
               mat-raised-button
               color="primary"
-              class="action-button">
+              class="action-button me-3">
               {{ editandoTurno ? "Actualizar" : "Agregar" }}
             </button>
             <button
@@ -118,11 +105,8 @@
               type="button"
               mat-raised-button
               color="warn"
-              class="action-button ms-3"
+              class="action-button"
               (click)="cancelarEdicion()">
-
-              >
-
               Cancelar
             </button>
           </div>
@@ -176,7 +160,7 @@
                 <mat-icon>edit</mat-icon>
               </button>
               <button mat-icon-button class="boton-eliminar" aria-label="Eliminar" (click)="eliminarTurno(turno.idUsuarioTurno)" >
-                <mat-icon>delete</mat-icon>
+                <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/delete.svg" alt="Eliminar" width="24" height="24" style="filter: invert(1);" />
               </button>
             </td>
           </tr>

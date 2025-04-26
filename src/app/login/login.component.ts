@@ -4,6 +4,7 @@ import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validator
 import { AxiosService } from '../axios.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { LoginService } from './services/Login.service';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,9 @@ export class LoginComponent implements OnInit {
   showPassword: boolean = false;
   errorMessage: string = '';
 
-  constructor(private formBuilder: FormBuilder, private axiosService: AxiosService,private router: Router) {}
+  constructor(private formBuilder: FormBuilder, private axiosService: AxiosService,private router: Router,
+    private loginServices:LoginService
+  ) {}
 
   ngOnInit(): void {
     this.loginForm = this.formBuilder.group({
@@ -46,24 +49,27 @@ export class LoginComponent implements OnInit {
       ...this.loginForm.value,
       cedula: Number(this.loginForm.value.cedula)
     };
-    try {
-      const response = await this.axiosService.post('/login/login', loginData);
-      const { token } = response.data;
-      localStorage.setItem('token', token);
-      Swal.fire({
-        title: 'Inicio de sesión exitoso',
-        text: 'Has iniciado sesión correctamente.',
-        icon: 'success',
-        confirmButtonText: 'Aceptar'
-      });
-      this.router.navigate(['/listarUsuario']); // Redirige al login
-    } catch (error) {
-      Swal.fire({
-        title: 'Error en el inicio de sesión',
-        text: 'No se pudo iniciar sesión. Por favor, verifica tus credenciales e intenta de nuevo.',
-        icon: 'error',
-        confirmButtonText: 'Aceptar'
-      });
-    }
+    this.loginServices.auth(loginData).subscribe(data=>{
+      this.router.navigate(['/listarUsuario']); 
+    })
+    // try {
+    //   const response = await this.axiosService.post('/login/login', loginData);
+    //   const { token } = response.data;
+    //   localStorage.setItem('token', token);
+    //   Swal.fire({
+    //     title: 'Inicio de sesión exitoso',
+    //     text: 'Has iniciado sesión correctamente.',
+    //     icon: 'success',
+    //     confirmButtonText: 'Aceptar'
+    //   });
+    //   this.router.navigate(['/listarUsuario']); // Redirige al login
+    // } catch (error) {
+    //   Swal.fire({
+    //     title: 'Error en el inicio de sesión',
+    //     text: 'No se pudo iniciar sesión. Por favor, verifica tus credenciales e intenta de nuevo.',
+    //     icon: 'error',
+    //     confirmButtonText: 'Aceptar'
+    //   });
+    // }
   }
 }
