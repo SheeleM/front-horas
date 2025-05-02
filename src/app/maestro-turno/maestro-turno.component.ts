@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AxiosService } from '../axios.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
@@ -46,7 +45,6 @@ export class MaestroTurnoComponent implements OnInit {
   Math = Math;
   constructor(
     private fb: FormBuilder,
-    private axiosService: AxiosService,
     private router: Router,
     private maestroTurnoService: MaestroTurnoService // nuevo servicio inyectado
   ) {
@@ -99,14 +97,21 @@ export class MaestroTurnoComponent implements OnInit {
       horaFin.setHours(parseInt(horas), parseInt(minutos), 0);
       turnoData.horaFin = horaFin.toISOString();
     }
-    try {
-      await this.maestroTurnoService.crearTurno(turnoData).subscribe();
-      this.mostrarExito('Turno creado correctamente');
-      this.resetForm();
-      this.cargarTurnos();
-    } catch (error) {
-      this.mostrarError('El codigo de turno ya esta en uso');
-    }
+
+    this.maestroTurnoService.crearTurno(turnoData).subscribe({
+      next: (nuevoTurno: any) => {
+        this.mostrarExito('Turno creado correctamente');
+        this.resetForm();
+        // Agrega el nuevo turno al arreglo y actualiza la tabla sin recargar todo
+        this.turnos.push(nuevoTurno);
+        this.aplicarFiltro();
+        // Si usas paginación, puedes ajustar la página actual si lo deseas
+        // this.paginaActual = this.totalPaginas;
+      },
+      error: () => {
+        this.mostrarError('El codigo de turno ya esta en uso');
+      }
+    });
   }
 
   actualizarTurno(): void {
