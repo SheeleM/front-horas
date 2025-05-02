@@ -6,8 +6,8 @@ import { RecuperarPasswordComponent } from './recuperar-password/recuperar-passw
 import { MaestroTurnoComponent } from './maestro-turno/maestro-turno.component';
 import { RegistroTurnoComponent } from './registro-turno/registro-turno.component';
 import { RegistroHorasComponent } from './registro-horas/registro-horas.component';
-import { HammerModule } from '@angular/platform-browser';
 import { authGuard } from './core/guards/auth.guard';
+import { MaestroHoraLegalComponent } from './maestro-hora-legal/maestro-hora-legal.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -17,6 +17,8 @@ export const routes: Routes = [
     { path: 'recovery', component: RecuperarPasswordComponent ,canActivate: [authGuard]},
     { path: 'maestroTurno', component: MaestroTurnoComponent ,canActivate: [authGuard]},
     { path: 'RegistroTurno', component: RegistroTurnoComponent , canActivate: [authGuard]},
-    { path: 'RegistroHora', component: RegistroHorasComponent ,canActivate: [authGuard]}
+    { path: 'registrohora', component: RegistroHorasComponent ,canActivate: [authGuard]},
+    { path: 'maestroHoraLegal', component: MaestroHoraLegalComponent ,canActivate: [authGuard]}
+
 
 ];

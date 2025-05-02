@@ -46,7 +46,6 @@ export interface UsuarioTurno {
   fechaFin: string;
   codigo: string;
   usuarioFK: number; // Agregar esta propiedad
-
 }
 
 @Component({
