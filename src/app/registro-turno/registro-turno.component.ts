@@ -201,19 +201,11 @@ export class RegistroTurnoComponent implements OnInit {
       (mesIndexStr: string) => {
         const mesIndex = Number(mesIndexStr);
         if (!isNaN(mesIndex)) {
+          // Obtener la cantidad de semanas para este mes
           const semanas = this.calcularSemanasDelMes(mesIndex);
-          // this.cabeceras = Array.from({ length: semanas }, (_, i) => `Semana ${i + 1}`);
-          // this.cabeceras = this.usuarioTurnosPorSemana.map((_, i) => `Semana ${i + 1}`);
-
-          // Aquí aplicamos el filtro por mes y luego agrupamos
-          this.usuarioTurnosFiltrados = this.usuarioTurnos.filter((turno) => {
-            const fecha = new Date(turno.fechaInicio);
-            return fecha.getMonth() === mesIndex;
-          });
-
-          this.usuarioTurnosPorSemana = this.separarTurnosPorSemana(
-            this.usuarioTurnosFiltrados
-          );
+          
+          // Aplicar el filtro por mes y distribuir en semanas
+          this.filtrarTurnosPorMesYDistribuirEnSemanas(mesIndex);
         } else {
           this.cabeceras = [];
           this.usuarioTurnosFiltrados = [];
@@ -222,20 +214,88 @@ export class RegistroTurnoComponent implements OnInit {
       }
     );
   }
+  
+  // Método para filtrar turnos por mes y distribuirlos en semanas
+  filtrarTurnosPorMesYDistribuirEnSemanas(mesIndex: number): void {
+    // Filtra los turnos que tienen alguna intersección con el mes seleccionado
+    this.usuarioTurnosFiltrados = this.usuarioTurnos.filter((turno) => {
+      const inicio = new Date(turno.fechaInicio);
+      const fin = new Date(turno.fechaFin);
+      
+      // El turno intersecta con el mes si:
+      // 1. El mes está dentro del rango de fechas (inicio <= mes <= fin)
+      // 2. O el mes contiene la fecha de inicio o la fecha de fin
+      const mesInicio = inicio.getMonth();
+      const mesFin = fin.getMonth();
+      
+      return (mesInicio <= mesIndex && mesFin >= mesIndex);
+    });
+
+    // Distribuir los turnos en las semanas del mes
+    this.distribuirTurnosEnSemanas(mesIndex);
+  }
+  
+  // Método para distribuir los turnos en las semanas correspondientes
+  distribuirTurnosEnSemanas(mesIndex: number): void {
+    // Obtener información del mes
+    const anio = this.anio;
+    const primerDiaMes = new Date(anio, mesIndex, 1);
+    const ultimoDiaMes = new Date(anio, mesIndex + 1, 0);
+    
+    // Calcular el primer día de la semana (lunes) que incluye o precede al primer día del mes
+    const primerLunes = new Date(primerDiaMes);
+    const diaSemana = primerDiaMes.getDay(); // 0 = domingo, 1 = lunes, ...
+    const ajusteDias = diaSemana === 0 ? 6 : diaSemana - 1; // Para que el lunes sea el día 0
+    primerLunes.setDate(primerLunes.getDate() - ajusteDias);
+    
+    // Calcular cuántas semanas hay en el mes
+    const totalSemanas = this.calcularSemanasDelMes(mesIndex);
+    
+    // Inicializar el array de semanas
+    this.usuarioTurnosPorSemana = Array(totalSemanas).fill(null).map(() => []);
+    
+    // Para cada turno filtrado, determinar en qué semanas está activo
+    this.usuarioTurnosFiltrados.forEach(turno => {
+      const fechaInicio = new Date(turno.fechaInicio);
+      const fechaFin = new Date(turno.fechaFin);
+      
+      // Para cada semana del mes
+      for (let semanaIndex = 0; semanaIndex < totalSemanas; semanaIndex++) {
+        // Calcular el rango de fechas de esta semana
+        const inicioSemana = new Date(primerLunes);
+        inicioSemana.setDate(primerLunes.getDate() + (semanaIndex * 7));
+        
+        const finSemana = new Date(inicioSemana);
+        finSemana.setDate(inicioSemana.getDate() + 6); // 6 días después del inicio (lunes a domingo)
+        
+        // Verificar si hay intersección entre el turno y esta semana
+        if (!(fechaFin < inicioSemana || fechaInicio > finSemana)) {
+          // Si hay intersección, agregar el turno a esta semana
+          this.usuarioTurnosPorSemana[semanaIndex].push(turno);
+        }
+      }
+    });
+    
+    // Generar etiquetas para las semanas
+    this.cabeceras = Array.from({ length: totalSemanas }, (_, i) => {
+      const inicio = new Date(primerLunes);
+      inicio.setDate(primerLunes.getDate() + (i * 7));
+      
+      const fin = new Date(inicio);
+      fin.setDate(inicio.getDate() + 6);
+      
+      return `Semana ${i + 1} (${inicio.getDate()}/${inicio.getMonth() + 1} - ${fin.getDate()}/${fin.getMonth() + 1})`;
+    });
+  }
+
   cargarTurnos() {
     this.registroTurnoService
       .getAllUsuariosTurno()
       .subscribe((data: UsuarioTurno[]) => {
         this.usuarioTurnos = data;
-        // Se activa el filtro automáticamente si ya hay un mes seleccionado
         const mesActual = Number(this.AsignacionTurnoFormMes.get('mes')?.value);
         if (!isNaN(mesActual)) {
-          this.usuarioTurnosFiltrados = this.usuarioTurnos.filter((turno) => {
-            return new Date(turno.fechaInicio).getMonth() === mesActual;
-          });
-          this.usuarioTurnosPorSemana = this.separarTurnosPorSemana(
-            this.usuarioTurnosFiltrados
-          );
+          this.filtrarTurnosPorMesYDistribuirEnSemanas(mesActual);
         }
       });
   }
@@ -245,44 +305,24 @@ export class RegistroTurnoComponent implements OnInit {
       .getAllUsuariosTurno()
       .subscribe((data: UsuarioTurno[]) => {
         this.usuarioTurnos = data;
-        this.usuarioTurnosPorSemana = this.separarTurnosPorSemana(data);
+        const mesActual = Number(this.AsignacionTurnoFormMes.get('mes')?.value);
+        if (!isNaN(mesActual)) {
+          this.filtrarTurnosPorMesYDistribuirEnSemanas(mesActual);
+        }
       });
   }
 
+  // Este método ya no se usa, pero lo mantenemos por compatibilidad
   separarTurnosPorSemana(turnos: UsuarioTurno[]): UsuarioTurno[][] {
-    const semanas: UsuarioTurno[][] = [];
-
-    if (!turnos.length) return semanas;
-
-    // Usamos el primer turno para obtener mes y año
-    const ejemploFecha = new Date(turnos[0].fechaInicio);
-    const mes = ejemploFecha.getMonth();
-    const anio = ejemploFecha.getFullYear();
-
-    const primerDiaMes = new Date(anio, mes, 1);
-    const ultimoDiaMes = new Date(anio, mes + 1, 0);
-
-    // Encontramos el primer lunes antes o igual al día 1 del mes
-    const primerLunes = new Date(primerDiaMes);
-    const day = primerLunes.getDay();
-    primerLunes.setDate(primerLunes.getDate() - ((day + 6) % 7)); // lunes = 0
-
-    // Creamos semanas desde el primer lunes hasta fin del mes
-    let inicioSemana = new Date(primerLunes);
-    while (inicioSemana <= ultimoDiaMes) {
-      const finSemana = new Date(inicioSemana);
-      finSemana.setDate(finSemana.getDate() + 6); // domingo
-
-      const semanaActual = turnos.filter((t) => {
-        const fecha = new Date(t.fechaInicio);
-        return fecha >= inicioSemana && fecha <= finSemana;
-      });
-
-      semanas.push(semanaActual);
-      inicioSemana.setDate(inicioSemana.getDate() + 7); // avanzar una semana
+    // Obtenemos el mes seleccionado
+    const mesIndex = Number(this.AsignacionTurnoFormMes.get('mes')?.value);
+    if (isNaN(mesIndex)) {
+      return [[], [], [], [], []];
     }
-
-    return semanas;
+    
+    // Usamos el nuevo método para distribuir los turnos
+    this.filtrarTurnosPorMesYDistribuirEnSemanas(mesIndex);
+    return this.usuarioTurnosPorSemana;
   }
 
   calcularSemanasDelMes(mesIndex: number): number {
@@ -307,15 +347,6 @@ export class RegistroTurnoComponent implements OnInit {
     return fecha.getDay(); // 0 = domingo, ..., 6 = sábado
   }
 
-  private _filter(value: string): Ingeniero[] {
-    const filterValue = value.toLowerCase();
-    return this.Ingenieros.filter(
-      (ing) =>
-        ing.fullname.toLowerCase().includes(filterValue) &&
-        //  !this.selectedIngenieros.includes(ing.fullname)
-        !this.selectedIngenieros.some((sel) => sel.id === ing.id)
-    );
-  }
 
   selected(event: MatAutocompleteSelectedEvent): void {
     //const value = event.option.viewValue;
@@ -360,147 +391,133 @@ export class RegistroTurnoComponent implements OnInit {
     this.AsignacionTurnoForm.reset();
   }
 
-  guardarTurno() {
-    try {
-      // Verificar que haya ingenieros seleccionados
-      if (this.selectedIngenieros.length === 0) {
-        console.error('No hay ingenieros seleccionados');
-        Swal.fire({
-          title: 'Error',
-          text: 'Debes seleccionar al menos un ingeniero',
-          icon: 'error',
-          confirmButtonText: 'Aceptar',
-        });
-        return;
-      }
-
-      // Verificar que los campos obligatorios estén completos
-      if (this.AsignacionTurnoForm.invalid) {
-        Swal.fire({
-          title: 'Error',
-          text: 'Por favor completa todos los campos requeridos',
-          icon: 'error',
-          confirmButtonText: 'Aceptar',
-        });
-        return;
-      }
-
-      // Obtener los valores comunes del formulario
-      const turnoFK = Number(this.AsignacionTurnoForm.value.turnoFK);
-      const fechaInicio = this.AsignacionTurnoForm.value.fechaInicio;
-      const fechaFin = this.AsignacionTurnoForm.value.fechaFin;
-
-      // Contador para rastrear las operaciones completadas
-      let completedOperations = 0;
-      let erroredOperations = 0;
-      const totalOperations = this.selectedIngenieros.length;
-
-      // Para cada ingeniero seleccionado, crear un registro de turno
-      this.selectedIngenieros.forEach((ingeniero) => {
-        const nuevoTurno: CreateUsuarioTurnoDto = {
-          turnoFK: turnoFK,
-          usuarioFK: ingeniero.id, // Usar el ID del ingeniero actual
-          fechaInicio: fechaInicio,
-          fechaFin: fechaFin,
-        };
-
-        console.log(
-          'Creando turno para:',
-          ingeniero.fullname,
-          'con ID:',
-          ingeniero.id
-        );
-
-        this.registroTurnoService.crearUsuarioTurno(nuevoTurno).subscribe({
-          next: (res) => {
-            console.log(`Turno creado para ${ingeniero.fullname}:`, res);
-            completedOperations++;
-
-            // Verificar si todas las operaciones se han completado
-            if (completedOperations + erroredOperations === totalOperations) {
-              if (erroredOperations === 0) {
-                // Todos los turnos se crearon con éxito
-                this.mostrarExito(
-                  `Se han guardado exitosamente ${completedOperations} turnos`
-                );
-                // Recargar lista de turnos desde el backend
-                this.registroTurnoService
-                  .getAllUsuariosTurno()
-                  .subscribe((data: UsuarioTurno[]) => {
-                    this.usuarioTurnos = data;
-
-                    const mesActual = Number(
-                      this.AsignacionTurnoFormMes.get('mes')?.value
-                    );
-                    if (!isNaN(mesActual)) {
-                      this.usuarioTurnosFiltrados = this.usuarioTurnos.filter(
-                        (turno) => {
-                          return (
-                            new Date(turno.fechaInicio).getMonth() === mesActual
-                          );
-                        }
-                      );
-
-                      this.usuarioTurnosPorSemana = this.separarTurnosPorSemana(
-                        this.usuarioTurnosFiltrados
-                      );
-                    }
-                  });
-                this.resetForm();
-                this.selectedIngenieros = [];
-              } else {
-                // Algunos turnos fallaron
-                Swal.fire({
-                  title: 'Parcialmente completado',
-                  text: `Se han guardado ${completedOperations} turnos, pero fallaron ${erroredOperations}`,
-                  icon: 'warning',
-                  confirmButtonText: 'Aceptar',
-                });
-              }
-            }
-          },
-          error: (err) => {
-            console.error(
-              `Error al crear turno para ${ingeniero.fullname}:`,
-              err
-            );
-            erroredOperations++;
-
-            // Verificar si todas las operaciones se han completado o fallado
-            if (completedOperations + erroredOperations === totalOperations) {
-              if (erroredOperations === totalOperations) {
-                // Todos los turnos fallaron
-                Swal.fire({
-                  title: 'Error',
-                  text: 'No se pudo guardar ningún turno',
-                  icon: 'error',
-                  confirmButtonText: 'Aceptar',
-                });
-              } else {
-                // Algunos turnos fallaron
-                Swal.fire({
-                  title: 'Parcialmente completado',
-                  text: `Se han guardado ${completedOperations} turnos, pero fallaron ${erroredOperations}`,
-                  icon: 'warning',
-                  confirmButtonText: 'Aceptar',
-                });
-              }
-            }
-          },
-        });
-      });
-    } catch (error) {
-      console.error('Error inesperado al guardar turnos:', error);
+guardarTurno() {
+  try {
+    // Verificar que haya ingenieros seleccionados
+    if (this.selectedIngenieros.length === 0) {
+      console.error('No hay ingenieros seleccionados');
       Swal.fire({
         title: 'Error',
-        text: 'Ha ocurrido un error inesperado al guardar los turnos',
+        text: 'Debes seleccionar al menos un ingeniero',
         icon: 'error',
         confirmButtonText: 'Aceptar',
       });
+      return;
     }
-  }
 
-  eliminarTurno(id: number) {
+    // Verificar que los campos obligatorios estén completos
+    if (this.AsignacionTurnoForm.invalid) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Por favor completa todos los campos requeridos',
+        icon: 'error',
+        confirmButtonText: 'Aceptar',
+      });
+      return;
+    }
+
+    // Obtener los valores comunes del formulario
+    const turnoFK = Number(this.AsignacionTurnoForm.value.turnoFK);
+    const fechaInicio = this.AsignacionTurnoForm.value.fechaInicio;
+    const fechaFin = this.AsignacionTurnoForm.value.fechaFin;
+
+    // Contador para rastrear las operaciones completadas
+    let completedOperations = 0;
+    let erroredOperations = 0;
+    const totalOperations = this.selectedIngenieros.length;
+
+    // Para cada ingeniero seleccionado, crear un registro de turno
+    this.selectedIngenieros.forEach((ingeniero) => {
+      const nuevoTurno = {
+        turnoFK: turnoFK,
+        usuarioFK: ingeniero.id, // Usar el ID del ingeniero actual
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+        calcularPorDias: true // Indicamos que queremos usar el cálculo por días configurados en el turno
+      };
+
+      console.log(
+        'Creando turno para:',
+        ingeniero.fullname,
+        'con ID:',
+        ingeniero.id
+      );
+
+      this.registroTurnoService.crearUsuarioTurno(nuevoTurno).subscribe({
+        next: (res) => {
+          console.log(`Turno creado para ${ingeniero.fullname}:`, res);
+          completedOperations++;
+
+          // Verificar si todas las operaciones se han completado
+          if (completedOperations + erroredOperations === totalOperations) {
+            if (erroredOperations === 0) {
+              // Todos los turnos se crearon con éxito
+              this.mostrarExito(
+                `Se han guardado exitosamente ${completedOperations} turnos`
+              );
+              // Recargar lista de turnos desde el backend
+              this.cargarTurnos();
+              this.resetForm();
+              this.selectedIngenieros = [];
+            } else {
+              // Algunos turnos fallaron
+              Swal.fire({
+                title: 'Parcialmente completado',
+                text: `Se han guardado ${completedOperations} turnos, pero fallaron ${erroredOperations}`,
+                icon: 'warning',
+                confirmButtonText: 'Aceptar',
+              });
+            }
+          }
+        },
+        error: (err) => {
+          console.error(
+            `Error al crear turno para ${ingeniero.fullname}:`,
+            err
+          );
+          erroredOperations++;
+
+          // Mostrar el mensaje de error exacto del backend
+          const errorMessage = err.error?.message || 'No se pudo guardar el turno';
+          
+          Swal.fire({
+            title: 'Error',
+            text: errorMessage,
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+          });
+
+          if (completedOperations + erroredOperations === totalOperations) {
+            if (erroredOperations === totalOperations) {
+              // Si todos los turnos fallaron, ya se mostró el mensaje de error específico
+              return;
+            } else {
+              // Si algunos tuvieron éxito, mostrar resumen
+              Swal.fire({
+                title: 'Parcialmente completado',
+                text: `Se han guardado ${completedOperations} turnos, pero fallaron ${erroredOperations}. Error: ${errorMessage}`,
+                icon: 'warning',
+                confirmButtonText: 'Aceptar',
+              });
+            }
+          }
+        },
+      });
+    });
+  } catch (error: any) {
+    console.error('Error inesperado al guardar turnos:', error);
+    const errorMessage = error.error?.message || 'Ha ocurrido un error inesperado al guardar los turnos';
+    
+    Swal.fire({
+      title: 'Error',
+      text: errorMessage,
+      icon: 'error',
+      confirmButtonText: 'Aceptar',
+    });
+  }
+}
+
+  eliminarTurno(id: number, semanaIndex?: number) {
     Swal.fire({
       title: '¿Estás seguro?',
       text: 'Esta acción no se puede deshacer',
@@ -513,7 +530,8 @@ export class RegistroTurnoComponent implements OnInit {
         this.registroTurnoService.deleteUsuarioTurno(id).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'El turno ha sido eliminado', 'success');
-            this.cargarTurnos(); // o recargar las semanas filtradas
+            // Recarga todos los turnos desde el backend para mantener la persistencia y consistencia
+            this.cargarTurnos();
           },
           error: () => {
             Swal.fire('Error', 'No se pudo eliminar el turno', 'error');
@@ -570,43 +588,77 @@ export class RegistroTurnoComponent implements OnInit {
     return turno ? turno.id : null;
   }
 
-  actualizarTurnoUsuario() {
-    if (!this.turnoEditId) return;
+actualizarTurnoUsuario() {
+  if (!this.turnoEditId) return;
 
-    const turnoFK = Number(this.AsignacionTurnoForm.value.turnoFK);
-    const fechaInicio = this.AsignacionTurnoForm.value.fechaInicio;
-    const fechaFin = this.AsignacionTurnoForm.value.fechaFin;
+  const turnoFK = Number(this.AsignacionTurnoForm.value.turnoFK);
+  const fechaInicio = this.AsignacionTurnoForm.value.fechaInicio;
+  const fechaFin = this.AsignacionTurnoForm.value.fechaFin;
 
-    const ingeniero = this.selectedIngenieros[0];
-
-    const turnoActualizado = {
-      idUsuarioTurno: Number(this.turnoEditId),
-      turnoFK: turnoFK,
-      usuarioFK: Number(ingeniero.id),
-      fechaInicio: fechaInicio instanceof Date ? fechaInicio.toISOString() : fechaInicio,
-      fechaFin: fechaFin instanceof Date ? fechaFin.toISOString() : fechaFin
-    };
-
-    this.registroTurnoService.updateUsuarioTurno(this.turnoEditId, turnoActualizado)
-      .subscribe({
-        next: (res) => {
-          this.mostrarExito('Turno actualizado exitosamente');
-          this.resetForm();
-          this.selectedIngenieros = [];
-          this.editandoTurno = false;
-          this.turnoEditId = null;
-          this.cargarTurnos();
-        },
-        error: (err) => {
-          Swal.fire({
-            title: 'Error',
-            text: err.error?.message || 'No se pudo actualizar el turno',
-            icon: 'error',
-            confirmButtonText: 'Aceptar'
-          });
-        }
-      });
+  // Verificar que hay al menos un ingeniero seleccionado
+  if (this.selectedIngenieros.length === 0) {
+    Swal.fire({
+      title: 'Error',
+      text: 'Debe seleccionar al menos un ingeniero',
+      icon: 'error',
+      confirmButtonText: 'Aceptar'
+    });
+    return;
   }
+
+  const ingeniero = this.selectedIngenieros[0];
+
+  // Verificar que todos los campos obligatorios estén llenos
+  if (!turnoFK || !fechaInicio || !fechaFin || !ingeniero.id) {
+    Swal.fire({
+      title: 'Error',
+      text: 'Todos los campos son obligatorios',
+      icon: 'error',
+      confirmButtonText: 'Aceptar'
+    });
+    return;
+  }
+
+  const turnoActualizado = {
+    idUsuarioTurno: Number(this.turnoEditId),
+    turnoFK: turnoFK,
+    usuarioFK: Number(ingeniero.id),
+    fechaInicio: fechaInicio instanceof Date ? fechaInicio.toISOString() : fechaInicio,
+    fechaFin: fechaFin instanceof Date ? fechaFin.toISOString() : fechaFin
+  };
+
+  this.registroTurnoService.updateUsuarioTurno(this.turnoEditId, turnoActualizado)
+    .subscribe({
+      next: (res) => {
+        this.mostrarExito('Turno actualizado exitosamente');
+        this.resetForm();
+        this.selectedIngenieros = [];
+        this.editandoTurno = false;
+        this.turnoEditId = null;
+        this.cargarTurnos();
+      },
+      error: (err) => {
+        let errorMsg = 'No se pudo actualizar el turno';
+        
+        // Verifica si hay un mensaje de error específico
+        if (err.error?.message) {
+          errorMsg = err.error.message;
+          
+          // Manejamos mensajes específicos sobre la configuración de días
+          if (errorMsg.includes('debe ser un')) {
+            errorMsg = `Error de configuración: ${errorMsg}. Este turno tiene días específicos configurados.`;
+          }
+        }
+        
+        Swal.fire({
+          title: 'Error',
+          text: errorMsg,
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+      }
+    });
+}
 
   cancelarEdicion(): void {
     this.editandoTurno = false;
@@ -614,5 +666,4 @@ export class RegistroTurnoComponent implements OnInit {
     this.resetForm();
     this.selectedIngenieros = [];
   }
-
 }

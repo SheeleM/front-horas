@@ -2,17 +2,17 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
-
 @Injectable({
   providedIn: 'root'
 })
-export class lregistroHoraService {
-
+export class RegistroUserService {
   constructor(private http: HttpClient) { }
 
-  // Envía los datos del formulario al backend para crear una hora extra
-  crearHoraExtra(data: any) {
-    return this.http.post(`${environment.url}horas-extras`, data);
+  getPreguntas() {
+    return this.http.get(`${environment.url}preguntas`);
   }
-  
+
+  registerUser(userData: any) {
+    return this.http.post(`${environment.url}user`, userData);
+  }
 }

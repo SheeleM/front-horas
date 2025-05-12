@@ -49,27 +49,18 @@ export class LoginComponent implements OnInit {
       ...this.loginForm.value,
       cedula: Number(this.loginForm.value.cedula)
     };
-    this.loginServices.auth(loginData).subscribe(data=>{
-      this.router.navigate(['/listarUsuario']); 
-    })
-    // try {
-    //   const response = await this.axiosService.post('/login/login', loginData);
-    //   const { token } = response.data;
-    //   localStorage.setItem('token', token);
-    //   Swal.fire({
-    //     title: 'Inicio de sesión exitoso',
-    //     text: 'Has iniciado sesión correctamente.',
-    //     icon: 'success',
-    //     confirmButtonText: 'Aceptar'
-    //   });
-    //   this.router.navigate(['/listarUsuario']); // Redirige al login
-    // } catch (error) {
-    //   Swal.fire({
-    //     title: 'Error en el inicio de sesión',
-    //     text: 'No se pudo iniciar sesión. Por favor, verifica tus credenciales e intenta de nuevo.',
-    //     icon: 'error',
-    //     confirmButtonText: 'Aceptar'
-    //   });
-    // }
+    this.loginServices.auth(loginData).subscribe({
+      next: (data) => {
+        this.router.navigate(['/listarUsuario']);
+      },
+      error: (err) => {
+        Swal.fire({
+          title: 'Error en el inicio de sesión',
+          text: 'Usuario o contraseña incorrectos.',
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+      }
+    });
   }
 }

@@ -12,4 +12,13 @@ export class RecuperarPasswordService {
   getByCedula(cedula:string){
     return this.http.get(`${environment.url}user/security-question/cedula=${cedula}`)
   }
+
+  updatePassword(data:any){
+    return this.http.patch(`${environment.url}user/update-password`,data)
+  }
+
+  recuperarPassword(data: any) {
+    return this.http.post(`${environment.url}user/recover`, data);
+  }
+
 }

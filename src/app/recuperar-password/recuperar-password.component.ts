@@ -2,9 +2,8 @@ import { RecuperarPasswordService } from './services/recuperar-password.service'
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AxiosService } from '../axios.service';
-import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-recuperar-password',
@@ -23,9 +22,8 @@ export class RecuperarPasswordComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private axiosService: AxiosService,
     private router: Router,
-    private recuperarPasswordService:RecuperarPasswordService
+    private recuperarPasswordService: RecuperarPasswordService
   ) {
     this.recuperarForm = this.fb.group({
       cedula: ['', [Validators.required, Validators.minLength(5)]],
@@ -41,8 +39,8 @@ export class RecuperarPasswordComponent implements OnInit {
   }
 
   ngOnInit(): void {
-   this.recuperarForm.get('cedula')?.valueChanges.subscribe(value => {
-    console.log("valor cedula from "+value)
+    this.recuperarForm.get('cedula')?.valueChanges.subscribe(value => {
+      console.log("valor cedula from " + value)
       console.log('Tipo de dato de cédula:', typeof value);
 
       if (value && value.length >= 5) {
@@ -53,28 +51,19 @@ export class RecuperarPasswordComponent implements OnInit {
     });
   }
 
-  async loadSecurityQuestion(cedula: string) { 
-    //const cedulaNumero = parseInt(cedula, 10);
-
-   // console.log('Cédula que se enviará al servidor:', cedulaNumero);
-  // Verifica el tipo de dato
- // console.log('Tipo de dato de cédula:', typeof cedulaNumero);
-  
+  async loadSecurityQuestion(cedula: string) {
     this.loadingQuestion = true;
     this.securityQuestion = 'Cargando pregunta...';
-    
+
     try {
       console.log('cedula-->', cedula)
-      this.recuperarPasswordService.getByCedula(cedula).subscribe((data:any)=>{
-
-      if (data.success) {
-        this.securityQuestion = data.question || '¿Cuál es tu pregunta de seguridad?';
-      } else {
-        this.securityQuestion = 'No se encontró pregunta para esta cédula';
-      }
-      })
-    //  const response = await this.axiosService.get(`/user/security-question?cedula=${encodeURIComponent(cedula)}`);
-  
+      this.recuperarPasswordService.getByCedula(cedula).subscribe((data: any) => {
+        if (data.success) {
+          this.securityQuestion = data.question || '¿Cuál es tu pregunta de seguridad?';
+        } else {
+          this.securityQuestion = 'No se encontró pregunta para esta cédula';
+        }
+      });
     } catch (error) {
       console.error('Error al cargar pregunta de seguridad:', error);
       this.securityQuestion = 'Error al cargar la pregunta';
@@ -105,48 +94,48 @@ export class RecuperarPasswordComponent implements OnInit {
 
     this.loading = true;
 
-    try {
-      const response = await this.axiosService.post('/user/recover', {
-        cedula: Number(this.recuperarForm.get('cedula')?.value),
-        respuestaSeguridad: this.recuperarForm.get('securityAnswer')?.value,
-        newPassword: this.recuperarForm.get('newPassword')?.value
-      });
-      if (!response || !response.data) {
-        throw new Error('Respuesta incompleta del servidor');
-      }
-      if (!response.data.success) {
-        throw new Error(response.data.message || 'Error en la recuperación de contraseña');
-      }
-      Swal.fire({
-        title: 'Éxito',
-        text: 'Tu contraseña ha sido actualizada correctamente',
-        icon: 'success',
-        confirmButtonText: 'Aceptar'
-      }).then(() => {
-        this.router.navigate(['/login']);
-      });
+    const data = {
+      cedula: Number(this.recuperarForm.get('cedula')?.value),
+      respuestaSeguridad: this.recuperarForm.get('securityAnswer')?.value,
+      newPassword: this.recuperarForm.get('newPassword')?.value
+    };
 
-    } catch (error: any) {
-      console.error('Error en recuperación de contraseña:', error);
-      let errorMessage = 'Ocurrió un error al procesar tu solicitud';
-      if (error.response) {
-        errorMessage = error.response.data?.message ||
-          'Los datos ingresados son incorrectos';
-      } else if (error.request) {
-        errorMessage = 'No se recibió respuesta del servidor. Verifica tu conexión.';
-      } else if (error.message) {
-        errorMessage = error.message;
+    this.recuperarPasswordService.recuperarPassword(data).subscribe({
+      next: (response: any) => {
+        if (!response || !response.success) {
+          Swal.fire({
+            title: 'Error',
+            text: response?.message || 'Error en la recuperación de contraseña',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+          });
+          this.loading = false;
+          return;
+        }
+        Swal.fire({
+          title: 'Éxito',
+          text: 'Tu contraseña ha sido actualizada correctamente',
+          icon: 'success',
+          confirmButtonText: 'Aceptar'
+        }).then(() => {
+          this.router.navigate(['/login']);
+        });
+        this.loading = false;
+      },
+      error: (error) => {
+        let errorMessage = 'Ocurrió un error al procesar tu solicitud';
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        }
+        Swal.fire({
+          title: 'Error',
+          text: errorMessage,
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+        this.loading = false;
       }
-
-      Swal.fire({
-        title: 'Error',
-        text: errorMessage,
-        icon: 'error',
-        confirmButtonText: 'Aceptar'
-      });
-    } finally {
-      this.loading = false;
-    }
+    });
   }
 
   private markFormGroupTouched(formGroup: FormGroup) {
