@@ -203,6 +203,7 @@ export class MaestroHoraLegalComponent implements OnInit {
           });
           return;
         }
+        //prueba
         this.maestroHoraLegalService.deleteMaestroHoraLegal(id).subscribe({
           next: () => {
             Swal.fire({
