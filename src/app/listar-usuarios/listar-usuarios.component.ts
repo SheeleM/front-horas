@@ -36,7 +36,7 @@ export class ListarUsuariosComponent implements OnInit {
   mostrarPopup = false;
   usuarioSeleccionado: Usuario | null = null;
   nuevaContrasena: string = '';
-  //confirmasContrasena: string = '';
+  errorContrasena: string = '';
 
   constructor(
     private listarUsuarioService: listarUsuarioService,
@@ -46,14 +46,30 @@ export class ListarUsuariosComponent implements OnInit {
     this.usuarioSeleccionado = usuario;
     this.mostrarPopup = true;
     this.nuevaContrasena = '';
-    //this.confirmasContrasena = '';
+    this.errorContrasena = '';
   }
 
   cerrarPopup() {
     this.mostrarPopup = false;
     this.nuevaContrasena = '';
-    //this.confirmasContrasena = '';
+    this.errorContrasena = '';
     this.usuarioSeleccionado = null;
+  }
+
+  // Método para validar la contraseña en tiempo real
+  validarContrasena() {
+    if (this.nuevaContrasena.trim().length === 0) {
+      this.errorContrasena = '';
+    } else if (this.nuevaContrasena.trim().length < 6) {
+      this.errorContrasena = 'La contraseña debe tener al menos 6 caracteres';
+    } else {
+      this.errorContrasena = '';
+    }
+  }
+
+  // Método para verificar si la contraseña es válida
+  esContrasenaValida(): boolean {
+    return this.nuevaContrasena.trim().length >= 6;
   }
 
   ngOnInit(): void {
@@ -67,10 +83,19 @@ export class ListarUsuariosComponent implements OnInit {
       Swal.fire('Error', 'No hay usuario seleccionado', 'error');
       return;
     }
+    
+    // Validar que la contraseña no esté vacía
     if (!this.nuevaContrasena.trim()) {
       Swal.fire('Error', 'La contraseña no puede estar vacía', 'error');
       return;
     }
+    
+    // Validar longitud mínima
+    if (!this.esContrasenaValida()) {
+      Swal.fire('Error', 'La contraseña debe tener al menos 6 caracteres', 'error');
+      return;
+    }
+
     this.listarUsuarioService.asignarContrasena(this.usuarioSeleccionado.cedula, this.nuevaContrasena).subscribe({
       next: () => {
         Swal.fire(

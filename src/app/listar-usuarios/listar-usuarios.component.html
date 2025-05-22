@@ -47,39 +47,47 @@
   </div>
 </div>
 
-
-  <!-- Modal para cambiar contraseña -->
-  <div class="modal-overlay" *ngIf="mostrarPopup">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h3>Cambiar Contraseña</h3>
-      </div>
-      <div class="modal-body">
-        <p *ngIf="usuarioSeleccionado">Usuario: <strong>{{ usuarioSeleccionado.fullname }}</strong></p>
-        
-        <div class="form-group">
-          <label for="nuevaContrasena">Nueva Contraseña:</label>
-          <div class="password-wrapper">
-            <input 
-              [type]="mostrarContrasena ? 'text' : 'password'" 
-              id="nuevaContrasena" 
-              [(ngModel)]="nuevaContrasena" 
-              placeholder="Ingrese la nueva contraseña">
-            <button type="button" class="toggle-btn" (click)="mostrarContrasena = !mostrarContrasena">
-              {{ mostrarContrasena ? '🙈' : '👁️' }}
-            </button>
-          </div>
+<!-- Modal para cambiar contraseña -->
+<div class="modal-overlay" *ngIf="mostrarPopup">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3>Cambiar Contraseña</h3>
+    </div>
+    <div class="modal-body">
+      <p *ngIf="usuarioSeleccionado">Usuario: <strong>{{ usuarioSeleccionado.fullname }}</strong></p>
+      
+      <div class="form-group">
+        <label for="nuevaContrasena">Nueva Contraseña:</label>
+        <div class="password-wrapper">
+          <input 
+            [type]="mostrarContrasena ? 'text' : 'password'" 
+            id="nuevaContrasena" 
+            [(ngModel)]="nuevaContrasena" 
+            (input)="validarContrasena()"
+            placeholder="Ingrese la nueva contraseña (mínimo 6 caracteres)"
+            [class.error]="errorContrasena">
+          <button type="button" class="toggle-btn" (click)="mostrarContrasena = !mostrarContrasena">
+            {{ mostrarContrasena ? '🙈' : '👁️' }}
+          </button>
         </div>
-        <!---
-        <div class="form-group">
-          <label for="nuevaContrasena">Confirmar Contraseña:</label>
-          <input type="password" id="nuevaContrasena" [(ngModel)]="nuevaContrasena" placeholder="Ingrese la nueva contraseña">
+        <!-- Mensaje de error -->
+        <div class="error-message" *ngIf="errorContrasena">
+          {{ errorContrasena }}
         </div>
-      --->
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="cerrarPopup()">Cancelar</button>
-        <button class="btn btn-primary" (click)="asignarContrasena()">Guardar</button>
+        <!-- Indicador de validez cuando está escribiendo -->
+        <div class="password-info" *ngIf="nuevaContrasena.length > 0 && !errorContrasena">
+          <span class="valid-message">✓ Contraseña válida</span>
+        </div>
       </div>
     </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cerrarPopup()">Cancelar</button>
+      <button 
+        class="btn btn-primary" 
+        [disabled]="!esContrasenaValida() || nuevaContrasena.trim().length === 0"
+        (click)="asignarContrasena()">
+        Guardar
+      </button>
+    </div>
   </div>
+</div>

@@ -18,8 +18,8 @@
 
   <div class="section-title">Tableros</div>
   <div>
-    <span [routerLink]="['/maestroTurno']" style="cursor: pointer; color: rgb(68, 68, 77); ">
-      Maestro turno
+    <span [routerLink]="['/maestroTurno']" *ngIf="data.rol == 'admin'" style="cursor: pointer; color: rgb(68, 68, 77); ">
+          Maestro turno
     </span>
   </div>
   <div>
@@ -39,7 +39,7 @@
 </div>
 
 <div>
-  <span [routerLink]="['/RegistroTurno']" style="cursor: pointer; color: rgb(68, 68, 77)">
+  <span [routerLink]="['/RegistroTurno']" *ngIf="data.rol == 'admin'" style="cursor: pointer; color: rgb(68, 68, 77)">
    AsignacionTurno
   </span>
 </div>

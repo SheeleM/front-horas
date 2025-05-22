@@ -307,3 +307,35 @@
   .row.gx-3 .col-md-6:nth-child(odd) {
     margin-right: 10px;
   }
+
+  .boton-editar, .boton-eliminar {
+    width: 35px !important;
+    height: 35px !important;
+    min-width: 28px !important;
+    padding: 0 !important;
+    margin: 0 3px !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  
+  .boton-editar mat-icon,
+  .boton-eliminar mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 16px !important;
+    line-height: 16px !important;
+  }
+  
+  td mat-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Contenedor para los botones de acciones */
+  .acciones-container {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+  }

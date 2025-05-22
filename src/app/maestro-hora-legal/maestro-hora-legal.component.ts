@@ -6,7 +6,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MaestroHoraExtraLegalService } from './services/maestroLegal.service';
 import Swal from 'sweetalert2';
-import { listarUsuarioService } from '../listar-usuarios/services/listarUsuario.service';
 
 export interface MaestroHoraLegal {
   id: number;
@@ -14,13 +13,18 @@ export interface MaestroHoraLegal {
   descripcion: string;
   horaInicio: Date;
   horaFin: Date;
+  horaInicio2: Date;
+  horaFin2: Date;
 }
 
 export interface GetMaestroHoraLegal {
+  id: number;
   codigoHoraExtra: string;
   descripcion: string;
   horaInicio: string;
   horaFin: string;
+  horaInicio2: string;
+  horaFin2: string;
 }
 
 @Component({
@@ -48,6 +52,8 @@ export class MaestroHoraLegalComponent implements OnInit {
     'descripcion',
     'horaInicio',
     'horaFin',
+     'horaInicio2',
+    'horaFin2',
     'acciones'
   ];
 
@@ -56,7 +62,14 @@ export class MaestroHoraLegalComponent implements OnInit {
       codigoHoraExtra: new FormControl('', [Validators.required]),
       descripcion: new FormControl('', [Validators.required]),
       horaInicio: new FormControl('', [Validators.required]),
-      horaFin: new FormControl('', [Validators.required])
+      horaFin: new FormControl('', [Validators.required]),
+      horaInicio2: new FormControl('', [Validators.required]),
+      horaFin2: new FormControl('', [Validators.required])
+    });
+
+    // Suscribirse a los cambios del formulario
+    this.horaLegalForm.valueChanges.subscribe(() => {
+      this.horaLegalForm.markAllAsTouched();
     });
   }
 
@@ -67,6 +80,8 @@ export class MaestroHoraLegalComponent implements OnInit {
   listarHorasLegales(): void {
     this.maestroHoraLegalService.ListarHorasLegal().subscribe({
       next: (data: any) => {
+        console.log('Datos recibidos del backend:', data);
+        
         // Si el backend devuelve un array de objetos con las propiedades correctas
         if (Array.isArray(data)) {
           this.dataSource.data = data as GetMaestroHoraLegal[];
@@ -77,13 +92,12 @@ export class MaestroHoraLegalComponent implements OnInit {
         }
       },
       error: (err) => {
+        console.error('Error al listar horas legales:', err);
         this.dataSource.data = [];
       }
     });
   }
 
-
-  
   private extraerHora(valor: string): string {
     // Si el valor es tipo "2025-12-27T14:00:00", devuelve "14:00"
     if (valor && valor.includes('T')) {
@@ -98,24 +112,30 @@ export class MaestroHoraLegalComponent implements OnInit {
       const formValue = this.horaLegalForm.value;
       const hoy = new Date();
       const fechaBase = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+      
       const formatHora = (hora: string) => {
-        if (!hora) return '';
+        if (!hora) return new Date();
         const [h, m] = hora.split(':');
-        return `${fechaBase}T${h}:${m}:00`;
+        return new Date(`${fechaBase}T${h}:${m}:00`);
       };
 
       const datos = {
         codigoHoraExtra: formValue.codigoHoraExtra,
         descripcion: formValue.descripcion,
         horaInicio: formatHora(formValue.horaInicio),
-        horaFin: formatHora(formValue.horaFin)
+        horaFin: formatHora(formValue.horaFin),
+        horaInicio2: formatHora(formValue.horaInicio2),
+        horaFin2: formatHora(formValue.horaFin2)
       };
+
+      console.log('Datos a enviar:', datos);
 
       if (this.editandoTurno && this.editandoId) {
         // Actualizar registro existente
         this.maestroHoraLegalService.actualizarMaestroHoraLegal(this.editandoId, datos)
           .subscribe({
-            next: () => {
+            next: (response) => {
+              console.log('Respuesta de actualización:', response);
               Swal.fire({
                 icon: 'success',
                 title: '¡Actualización exitosa!',
@@ -127,11 +147,12 @@ export class MaestroHoraLegalComponent implements OnInit {
               this.editandoTurno = false;
               this.editandoId = null;
             },
-            error: () => {
+            error: (error) => {
+              console.error('Error al actualizar:', error);
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'No se pudo actualizar el tipo de hora legal.',
+                text: error.error?.message || 'No se pudo actualizar el tipo de hora legal.',
                 confirmButtonColor: '#dc3545'
               });
             }
@@ -140,7 +161,8 @@ export class MaestroHoraLegalComponent implements OnInit {
         // Crear nuevo registro
         this.maestroHoraLegalService.crearMaestroHoraLegal(datos)
           .subscribe({
-            next: () => {
+            next: (response) => {
+              console.log('Respuesta de creación:', response);
               Swal.fire({
                 icon: 'success',
                 title: '¡Registro exitoso!',
@@ -150,8 +172,22 @@ export class MaestroHoraLegalComponent implements OnInit {
               this.listarHorasLegales();
               this.horaLegalForm.reset();
             },
-            error: (err) => {
-              // Manejar error
+            error: (error) => {
+              console.error('Error al crear:', error);
+              let errorMessage = 'No se pudo registrar el tipo de hora legal.';
+              
+              if (error.error?.message) {
+                errorMessage = error.error.message;
+              } else if (error.message) {
+                errorMessage = error.message;
+              }
+              
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage,
+                confirmButtonColor: '#dc3545'
+              });
             }
           });
       }
@@ -161,7 +197,7 @@ export class MaestroHoraLegalComponent implements OnInit {
         Swal.fire({
           icon: 'warning',
           title: 'Campos obligatorios',
-          text: 'Por favor, completa todos los campos: Código de Hora Extra, Descripción, Hora Inicio y Hora Fin.',
+          text: 'Por favor, completa todos los campos requeridos.',
           confirmButtonColor: '#fbc02d'
         });
       }, 0);
@@ -169,15 +205,30 @@ export class MaestroHoraLegalComponent implements OnInit {
   }
 
   editarHoraExtra(element: any) {
-    // Rellena el formulario con los datos del registro a editar
+    this.editandoTurno = true;
+    this.editandoId = element.id;
+    
+    // Actualizar el formulario con los datos existentes
     this.horaLegalForm.patchValue({
       codigoHoraExtra: element.codigoHoraExtra,
       descripcion: element.descripcion,
       horaInicio: this.extraerHora(element.horaInicio),
-      horaFin: this.extraerHora(element.horaFin)
+      horaFin: this.extraerHora(element.horaFin),
+      horaInicio2: this.extraerHora(element.horaInicio2),
+      horaFin2: this.extraerHora(element.horaFin2)
     });
-    this.editandoTurno = true;
-    this.editandoId = element.id ?? element._id ?? null;
+
+    // Marcar los campos como "touched" para activar las validaciones
+    Object.keys(this.horaLegalForm.controls).forEach(key => {
+      const control = this.horaLegalForm.get(key);
+      control?.markAsTouched();
+    });
+  }
+
+  cancelarEdicion() {
+    this.editandoTurno = false;
+    this.editandoId = null;
+    this.horaLegalForm.reset();
   }
 
   eliminarHoraExtra(element: any) {
@@ -193,7 +244,7 @@ export class MaestroHoraLegalComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then(result => {
       if (result.isConfirmed) {
-        const id = element.id ?? element._id;
+        const id = element.id;
         if (!id) {
           Swal.fire({
             icon: 'error',
@@ -203,7 +254,7 @@ export class MaestroHoraLegalComponent implements OnInit {
           });
           return;
         }
-        //prueba
+        
         this.maestroHoraLegalService.deleteMaestroHoraLegal(id).subscribe({
           next: () => {
             Swal.fire({
@@ -214,7 +265,8 @@ export class MaestroHoraLegalComponent implements OnInit {
             });
             this.listarHorasLegales(); // Actualiza la tabla automáticamente
           },
-          error: () => {
+          error: (error) => {
+            console.error('Error al eliminar:', error);
             Swal.fire({
               icon: 'error',
               title: 'Error',
@@ -227,6 +279,7 @@ export class MaestroHoraLegalComponent implements OnInit {
     });
   }
 
+  // Getters para validaciones
   get codHoraLegal() {
     const control = this.horaLegalForm.get('codigoHoraExtra');
     return control?.invalid && control?.touched;
@@ -247,15 +300,13 @@ export class MaestroHoraLegalComponent implements OnInit {
     return control?.invalid && control?.touched;
   }
 
-  async obtenerListaMaestroLegal() {
-    try {
-      this.maestroHoraLegalService.ListarHorasLegal().subscribe((response: any) => {
-       this.maestroLista=response ?? [];
-        console.log("data de maesrtro legal",this.maestroLista); 
-      });
-    } catch (error) {
-      console.error('Error al obtener roles:', error);
-    }
+  get horaInicio2Invalid() {
+    const control = this.horaLegalForm.get('horaInicio2');
+    return control?.invalid && control?.touched;
   }
 
+  get horaFin2Invalid() {
+    const control = this.horaLegalForm.get('horaFin2');
+    return control?.invalid && control?.touched;
+  }
 }

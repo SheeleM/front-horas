@@ -24,6 +24,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Observable, map, startWith } from 'rxjs';
 import { RegistroTurnoService } from './services/registro-Turno.service';
 import Swal from 'sweetalert2';
@@ -38,6 +39,10 @@ export interface CreateUsuarioTurnoDto {
   usuarioFK: number;
   fechaInicio: Date;
   fechaFin: Date;
+  idUsuarioTurno?: number; // Add this field as optional
+  horaInicio?: string;
+  horaFin?: string;
+  nombre?: string;
 }
 export interface UsuarioTurno {
   idUsuarioTurno: number;
@@ -46,8 +51,16 @@ export interface UsuarioTurno {
   fechaFin: string;
   codigo: string;
   usuarioFK: number; // Agregar esta propiedad
+ turno: Turno;
 }
 
+export interface Turno {
+  idTurno: number;
+  codigo: string;
+  nombre: string;
+  horaInicio: string;
+  horaFin: string;
+}
 @Component({
   selector: 'app-registro-turno',
   standalone: true,
@@ -75,11 +88,16 @@ export interface UsuarioTurno {
     MatButtonModule,
     MatSelectModule,
     MatTableModule,
+    MatCheckboxModule,
   ],
   templateUrl: './registro-turno.component.html',
   styleUrls: ['./registro-turno.component.css'],
 })
 export class RegistroTurnoComponent implements OnInit {
+
+    // Nueva propiedad para manejar la selección múltiple
+  turnosSeleccionados: Set<number> = new Set();
+
   turnoEditId: number | null = null;
 
   usuarioTurnos: UsuarioTurno[] = [];
@@ -149,16 +167,15 @@ export class RegistroTurnoComponent implements OnInit {
     private fb: FormBuilder,
     private registroTurnoService: RegistroTurnoService
   ) {
+//turno registro
     this.registroTurnoService.getAllTurno().subscribe((data: any) => {
       this.codigo = data;
-      console.log('data--->', data);
     });
 
     this.registroTurnoService
       .getAllUsuarios()
       .subscribe((data: Ingeniero[]) => {
         this.Ingenieros = data;
-        console.log('dataEnginerio--->', data);
 
         this.filteredIngenieros = this.ingenieroCtrl.valueChanges.pipe(
           startWith(''),
@@ -173,21 +190,15 @@ export class RegistroTurnoComponent implements OnInit {
       });
   }
 
-  inicializarFormulario(): void {
-    this.AsignacionTurnoForm = this.fb.group({
-      turnoFK: ['', Validators.required],
-      ingenierosAsignados: [[], Validators.required], // 👈 Este es nuevo
-      fechaInicio: [null, Validators.required],
-      fechaFin: [null, Validators.required],
-    });
-  }
-
   ngOnInit(): void {
     this.AsignacionTurnoForm = this.fb.group({
       fechaInicio: [''],
       fechaFin: [''],
       turnoFK: [''],
       periodo: [''],
+     horaInicio: [''],
+      horaFin: [''],
+      nombre: ['']
     });
     // Inicialización del formulario de filtrado para la tabla
     this.AsignacionTurnoFormMes = this.fb.group({
@@ -196,6 +207,7 @@ export class RegistroTurnoComponent implements OnInit {
 
     // Al cambiar el mes se recalcula la cantidad de semanas y se genera el arreglo de labels
     this.cargarTurnos(); // carga inicial de datos
+    
 
     this.AsignacionTurnoFormMes.get('mes')?.valueChanges.subscribe(
       (mesIndexStr: string) => {
@@ -227,6 +239,8 @@ export class RegistroTurnoComponent implements OnInit {
       // 2. O el mes contiene la fecha de inicio o la fecha de fin
       const mesInicio = inicio.getMonth();
       const mesFin = fin.getMonth();
+     // const horaInicio= inicio.getHours();
+      //const horaFin= fin.getHours();
       
       return (mesInicio <= mesIndex && mesFin >= mesIndex);
     });
@@ -293,6 +307,7 @@ export class RegistroTurnoComponent implements OnInit {
       .getAllUsuariosTurno()
       .subscribe((data: UsuarioTurno[]) => {
         this.usuarioTurnos = data;
+        console.log('turnos cargados', this.usuarioTurnos);
         const mesActual = Number(this.AsignacionTurnoFormMes.get('mes')?.value);
         if (!isNaN(mesActual)) {
           this.filtrarTurnosPorMesYDistribuirEnSemanas(mesActual);
@@ -392,129 +407,135 @@ export class RegistroTurnoComponent implements OnInit {
   }
 
 guardarTurno() {
-  try {
-    // Verificar que haya ingenieros seleccionados
-    if (this.selectedIngenieros.length === 0) {
-      console.error('No hay ingenieros seleccionados');
-      Swal.fire({
-        title: 'Error',
-        text: 'Debes seleccionar al menos un ingeniero',
-        icon: 'error',
-        confirmButtonText: 'Aceptar',
-      });
-      return;
-    }
-
-    // Verificar que los campos obligatorios estén completos
-    if (this.AsignacionTurnoForm.invalid) {
-      Swal.fire({
-        title: 'Error',
-        text: 'Por favor completa todos los campos requeridos',
-        icon: 'error',
-        confirmButtonText: 'Aceptar',
-      });
-      return;
-    }
-
-    // Obtener los valores comunes del formulario
-    const turnoFK = Number(this.AsignacionTurnoForm.value.turnoFK);
-    const fechaInicio = this.AsignacionTurnoForm.value.fechaInicio;
-    const fechaFin = this.AsignacionTurnoForm.value.fechaFin;
-
-    // Contador para rastrear las operaciones completadas
-    let completedOperations = 0;
-    let erroredOperations = 0;
-    const totalOperations = this.selectedIngenieros.length;
-
-    // Para cada ingeniero seleccionado, crear un registro de turno
-    this.selectedIngenieros.forEach((ingeniero) => {
-      const nuevoTurno = {
-        turnoFK: turnoFK,
-        usuarioFK: ingeniero.id, // Usar el ID del ingeniero actual
-        fechaInicio: fechaInicio,
-        fechaFin: fechaFin,
-        calcularPorDias: true // Indicamos que queremos usar el cálculo por días configurados en el turno
-      };
-
-      console.log(
-        'Creando turno para:',
-        ingeniero.fullname,
-        'con ID:',
-        ingeniero.id
-      );
-
-      this.registroTurnoService.crearUsuarioTurno(nuevoTurno).subscribe({
-        next: (res) => {
-          console.log(`Turno creado para ${ingeniero.fullname}:`, res);
-          completedOperations++;
-
-          // Verificar si todas las operaciones se han completado
-          if (completedOperations + erroredOperations === totalOperations) {
-            if (erroredOperations === 0) {
-              // Todos los turnos se crearon con éxito
-              this.mostrarExito(
-                `Se han guardado exitosamente ${completedOperations} turnos`
-              );
-              // Recargar lista de turnos desde el backend
-              this.cargarTurnos();
-              this.resetForm();
-              this.selectedIngenieros = [];
-            } else {
-              // Algunos turnos fallaron
-              Swal.fire({
-                title: 'Parcialmente completado',
-                text: `Se han guardado ${completedOperations} turnos, pero fallaron ${erroredOperations}`,
-                icon: 'warning',
-                confirmButtonText: 'Aceptar',
-              });
-            }
-          }
-        },
-        error: (err) => {
-          console.error(
-            `Error al crear turno para ${ingeniero.fullname}:`,
-            err
-          );
-          erroredOperations++;
-
-          // Mostrar el mensaje de error exacto del backend
-          const errorMessage = err.error?.message || 'No se pudo guardar el turno';
-          
-          Swal.fire({
-            title: 'Error',
-            text: errorMessage,
-            icon: 'error',
-            confirmButtonText: 'Aceptar'
-          });
-
-          if (completedOperations + erroredOperations === totalOperations) {
-            if (erroredOperations === totalOperations) {
-              // Si todos los turnos fallaron, ya se mostró el mensaje de error específico
-              return;
-            } else {
-              // Si algunos tuvieron éxito, mostrar resumen
-              Swal.fire({
-                title: 'Parcialmente completado',
-                text: `Se han guardado ${completedOperations} turnos, pero fallaron ${erroredOperations}. Error: ${errorMessage}`,
-                icon: 'warning',
-                confirmButtonText: 'Aceptar',
-              });
-            }
-          }
-        },
-      });
-    });
-  } catch (error: any) {
-    console.error('Error inesperado al guardar turnos:', error);
-    const errorMessage = error.error?.message || 'Ha ocurrido un error inesperado al guardar los turnos';
-    
+  // Verificar que haya ingenieros seleccionados
+  if (this.selectedIngenieros.length === 0) {
     Swal.fire({
       title: 'Error',
-      text: errorMessage,
+      text: 'Debes seleccionar al menos un ingeniero',
       icon: 'error',
       confirmButtonText: 'Aceptar',
     });
+    return;
   }
+
+  // Verificar que los campos obligatorios estén completos
+  if (this.AsignacionTurnoForm.invalid) {
+    Swal.fire({
+      title: 'Error',
+      text: 'Por favor completa todos los campos requeridos',
+      icon: 'error',
+      confirmButtonText: 'Aceptar',
+    });
+    return;
+  }
+
+  const turnoFK = Number(this.AsignacionTurnoForm.value.turnoFK);
+  const fechaInicio = this.AsignacionTurnoForm.value.fechaInicio;
+  const fechaFin = this.AsignacionTurnoForm.value.fechaFin;
+
+  // Verificar superposición para cada ingeniero
+  const verificacionesPromises = this.selectedIngenieros.map(ingeniero => 
+    this.registroTurnoService.verificarSuperposicionTurno(
+      ingeniero.id, 
+      fechaInicio, 
+      fechaFin
+    ).toPromise()
+  );
+
+  Promise.all(verificacionesPromises)
+    .then(resultados => {
+      // Buscar si algún ingeniero tiene superposición
+      const superposicionesEncontradas = resultados.filter(resultado => resultado.existeSuperposicion);
+
+      if (superposicionesEncontradas.length > 0) {
+        // Obtener detalles del primer turno superpuesto (podríamos manejar múltiples, pero para simplicidad usamos el primero)
+        const superposicion = superposicionesEncontradas[0];
+        const ingeniero = this.selectedIngenieros.find(ing => ing.id === superposicion.usuarioFK) || { fullname: 'Usuario' };
+        
+        // Buscar el código del turno usando el turnoFK de la superposición
+        const turnoSuperpuesto = this.codigo.find(t => t.idTurno === superposicion.turnoSuperpuesto?.turnoFK);
+        const codigoTurno = turnoSuperpuesto?.codigo || 'No especificado';
+        
+        // Determinar la semana y mes del turno superpuesto
+        const fechaSuperpuesta = new Date(superposicion.turnoSuperpuesto?.fechaInicio || new Date());
+        const mesSuperpuesto = this.nombresMeses[fechaSuperpuesta.getMonth()];
+        
+        // Calcular número de semana en el mes
+        const primerDiaMes = new Date(fechaSuperpuesta.getFullYear(), fechaSuperpuesta.getMonth(), 1);
+        const diaSemana = primerDiaMes.getDay(); // 0 = domingo, 1 = lunes, ...
+        const ajusteDias = diaSemana === 0 ? 6 : diaSemana - 1;
+        const semanaMes = Math.ceil((fechaSuperpuesta.getDate() + ajusteDias) / 7);
+
+        // Mostrar confirmación personalizada
+        Swal.fire({
+          title: 'Superposición de Turnos',
+          html: `Ya hay un turno <b>${codigoTurno}</b> asignado a <b>${ingeniero.fullname}</b> en la semana <b>${semanaMes}</b> de <b>${mesSuperpuesto}</b>.<br>¿Desea continuar?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, guardar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Proceder con la creación de turnos
+            this.crearTurnosConfirmados(turnoFK, fechaInicio, fechaFin);
+          }
+        });
+      } else {
+        // No hay superposiciones, crear turnos directamente
+        this.crearTurnosConfirmados(turnoFK, fechaInicio, fechaFin);
+      }
+    })
+    .catch(error => {
+      console.error('Error al verificar superposición', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'No se pudo verificar la superposición de turnos',
+        icon: 'error',
+        confirmButtonText: 'Aceptar'
+      });
+    });
+}
+
+// Método para crear turnos después de confirmación
+crearTurnosConfirmados(turnoFK: number, fechaInicio: Date, fechaFin: Date) {
+  let completedOperations = 0;
+  let erroredOperations = 0;
+  const totalOperations = this.selectedIngenieros.length;
+
+  this.selectedIngenieros.forEach((ingeniero) => {
+    const nuevoTurno = {
+      turnoFK: turnoFK,
+      usuarioFK: ingeniero.id,
+      fechaInicio: fechaInicio,
+      fechaFin: fechaFin,
+      calcularPorDias: true
+    };
+
+    this.registroTurnoService.crearUsuarioTurno(nuevoTurno).subscribe({
+      next: (res) => {
+        completedOperations++;
+        
+        // Éxito
+        if (completedOperations + erroredOperations === totalOperations) {
+          this.mostrarExito(`Se han guardado exitosamente ${completedOperations} turnos`);
+          this.cargarTurnos();
+          this.resetForm();
+          this.selectedIngenieros = [];
+        }
+      },
+      error: (err) => {
+        erroredOperations++;
+        
+        // Manejo de errores
+        Swal.fire({
+          title: 'Error',
+          text: err.error?.message || 'No se pudo guardar el turno',
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+      }
+    });
+  });
 }
 
   eliminarTurno(id: number, semanaIndex?: number) {
@@ -546,13 +567,18 @@ guardarTurno() {
     this.turnoEditId = turno.idUsuarioTurno;
   
     const turnoEncontrado = this.codigo.find(t => t.codigo === turno.codigo);
-  
+    for (const key of this.usuarioTurnos) {
     this.AsignacionTurnoForm.patchValue({
+    
+     
       fechaInicio: new Date(turno.fechaInicio),
       fechaFin: new Date(turno.fechaFin),
-      turnoFK: turnoEncontrado ? turnoEncontrado.idTurno : null
+      turnoFK: turnoEncontrado ? turnoEncontrado.idTurno : null,
+      horaInicio:key.turno.horaInicio ,
+      horaFin: key.turno.horaFin|| '',
+      nombre: key.turno.nombre|| ''
     });
-  
+   }
     // Depuración: muestra el objeto turno recibido
     console.log('Turno recibido en editarTurno:', turno);
   
@@ -589,7 +615,10 @@ guardarTurno() {
   }
 
 actualizarTurnoUsuario() {
-  if (!this.turnoEditId) return;
+  if (this.turnoEditId === null) {
+    console.error('No hay turno seleccionado para editar');
+    return;
+  }
 
   const turnoFK = Number(this.AsignacionTurnoForm.value.turnoFK);
   const fechaInicio = this.AsignacionTurnoForm.value.fechaInicio;
@@ -619,12 +648,74 @@ actualizarTurnoUsuario() {
     return;
   }
 
-  const turnoActualizado = {
-    idUsuarioTurno: Number(this.turnoEditId),
-    turnoFK: turnoFK,
-    usuarioFK: Number(ingeniero.id),
-    fechaInicio: fechaInicio instanceof Date ? fechaInicio.toISOString() : fechaInicio,
-    fechaFin: fechaFin instanceof Date ? fechaFin.toISOString() : fechaFin
+  // Verificar superposición antes de actualizar el turno
+  this.registroTurnoService.verificarSuperposicionTurno(
+    ingeniero.id,
+    fechaInicio,
+    fechaFin
+  ).subscribe({
+    next: (resultado) => {
+      if (resultado.existeSuperposicion) {
+        // Obtener detalles del turno superpuesto
+        const turnoSuperpuesto = this.codigo.find(t => t.idTurno === resultado.turnoSuperpuesto?.turnoFK);
+        const codigoTurno = turnoSuperpuesto?.codigo || 'No especificado';
+        
+        // Determinar la semana y mes del turno superpuesto
+        const fechaSuperpuesta = new Date(resultado.turnoSuperpuesto?.fechaInicio || new Date());
+        const mesSuperpuesto = this.nombresMeses[fechaSuperpuesta.getMonth()];
+        
+        // Calcular número de semana en el mes
+        const primerDiaMes = new Date(fechaSuperpuesta.getFullYear(), fechaSuperpuesta.getMonth(), 1);
+        const diaSemana = primerDiaMes.getDay(); // 0 = domingo, 1 = lunes, ...
+        const ajusteDias = diaSemana === 0 ? 6 : diaSemana - 1;
+        const semanaMes = Math.ceil((fechaSuperpuesta.getDate() + ajusteDias) / 7);
+
+        // Mostrar confirmación personalizada
+        Swal.fire({
+          title: 'Superposición de Turnos',
+          html: `Ya hay un turno <b>${codigoTurno}</b> asignado a <b>${ingeniero.fullname}</b> en la semana <b>${semanaMes}</b> de <b>${mesSuperpuesto}</b>.<br>¿Desea continuar?`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, actualizar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Proceder con la actualización del turno
+            this.procesarActualizacionTurno(turnoFK, ingeniero.id, fechaInicio, fechaFin);
+          }
+        });
+      } else {
+        // No hay superposiciones, actualizar turno directamente
+        this.procesarActualizacionTurno(turnoFK, ingeniero.id, fechaInicio, fechaFin);
+      }
+    },
+    error: (err) => {
+      console.error('Error al verificar superposición', err);
+      Swal.fire({
+        title: 'Error',
+        text: 'No se pudo verificar la superposición de turnos',
+        icon: 'error',
+        confirmButtonText: 'Aceptar'
+      });
+    }
+  });
+}
+
+procesarActualizacionTurno(turnoFK: number, usuarioFK: number, fechaInicio: Date, fechaFin: Date) {
+  if (this.turnoEditId === null) {
+    console.error('turnoEditId es null');
+    return;
+  }
+
+  const turnoActualizado: CreateUsuarioTurnoDto = {
+    idUsuarioTurno: this.turnoEditId,
+    turnoFK,
+    usuarioFK,
+    fechaInicio,
+    fechaFin,
+    horaInicio: this.AsignacionTurnoForm.get('horaInicio')?.value || null,
+    horaFin: this.AsignacionTurnoForm.get('horaFin')?.value || null,
+    nombre: this.AsignacionTurnoForm.get('nombre')?.value || null
   };
 
   this.registroTurnoService.updateUsuarioTurno(this.turnoEditId, turnoActualizado)
@@ -665,5 +756,99 @@ actualizarTurnoUsuario() {
     this.turnoEditId = null;
     this.resetForm();
     this.selectedIngenieros = [];
+  }
+
+  // 2. Agregar estos métodos para manejar la selección y eliminación masiva
+  
+  // Método para alternar la selección de un turno
+  toggleSeleccion(idUsuarioTurno: number): void {
+    if (this.turnosSeleccionados.has(idUsuarioTurno)) {
+      this.turnosSeleccionados.delete(idUsuarioTurno);
+    } else {
+      this.turnosSeleccionados.add(idUsuarioTurno);
+    }
+  }
+  
+  // Método para comprobar si un turno está seleccionado
+  estaSeleccionado(idUsuarioTurno: number): boolean {
+    return this.turnosSeleccionados.has(idUsuarioTurno);
+  }
+  
+  // Método para eliminar todos los turnos seleccionados
+  eliminarSeleccionados(): void {
+    // Verificar si hay turnos seleccionados
+    if (this.turnosSeleccionados.size === 0) {
+      Swal.fire({
+        title: 'Información',
+        text: 'No hay turnos seleccionados para eliminar',
+        icon: 'info',
+        confirmButtonText: 'Aceptar'
+      });
+      return;
+    }
+    
+    // Confirmar eliminación
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `Se eliminarán ${this.turnosSeleccionados.size} turnos. Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Convertir Set a Array para enviar al servicio
+        const idsParaEliminar = Array.from(this.turnosSeleccionados);
+        
+        this.registroTurnoService.eliminarMultiplesTurnos(idsParaEliminar).subscribe({
+          next: () => {
+            Swal.fire({
+              title: 'Éxito',
+              text: `Se han eliminado ${idsParaEliminar.length} turnos correctamente`,
+              icon: 'success',
+              confirmButtonText: 'Aceptar'
+            });
+            
+            // Limpiar selección y recargar datos
+            this.turnosSeleccionados.clear();
+            this.cargarTurnos();
+          },
+          error: (err) => {
+            Swal.fire({
+              title: 'Error',
+              text: err.error?.message || 'No se pudieron eliminar los turnos',
+              icon: 'error',
+              confirmButtonText: 'Aceptar'
+            });
+          }
+        });
+      }
+    });
+  }
+  
+  // Método para seleccionar/deseleccionar todos los turnos de una semana
+  toggleSeleccionarTodosSemana(semana: UsuarioTurno[], seleccionar: boolean): void {
+    semana.forEach(turno => {
+      if (seleccionar) { 
+        this.turnosSeleccionados.add(turno.idUsuarioTurno);
+      } else {
+        this.turnosSeleccionados.delete(turno.idUsuarioTurno);
+      }
+    });
+  }
+  
+  // Método para verificar si todos los turnos de una semana están seleccionados
+  todosSeleccionadosSemana(semana: UsuarioTurno[]): boolean {
+    return semana.length > 0 && semana.every(turno => this.turnosSeleccionados.has(turno.idUsuarioTurno));
+  }
+  
+  // Método para verificar si algún turno de una semana está seleccionado
+  algunoSeleccionadoSemana(semana: UsuarioTurno[]): boolean {
+    return semana.some(turno => this.turnosSeleccionados.has(turno.idUsuarioTurno));
+  }
+  
+  // Método para limpiar todas las selecciones
+  limpiarSeleccion(): void {
+    this.turnosSeleccionados.clear();
   }
 }

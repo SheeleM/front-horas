@@ -54,27 +54,58 @@ export class RegistroTurnoService {
     return this.http.delete(`${environment.url}usuario-turno/${id}`);
   }
 
-/*
-updateUsuarioTurno(id: number, dto: CreateUsuarioTurnoDto) {
-  return this.http.patch(`${environment.url}usuario-turno/${id}`, dto);
-}*/
+  updateUsuarioTurno(id: number, dto: CreateUsuarioTurnoDto) {
+    const payload = {
+      ...dto,
+      idUsuarioTurno: Number(id) // Ensure it's a number
+    };
+    
+    return this.http.patch<any>(`${environment.url}usuario-turno/${id}`, payload)
+      .pipe(
+        catchError(error => {
+          console.error('Error al actualizar turno:', error);
+          return throwError(() => error);
+        })
+      );
+  }
 
-// Asegúrate de que el método updateUsuarioTurno esté configurado para manejar errores HTTP
-updateUsuarioTurno(id: number,dto: CreateUsuarioTurnoDto) {
-  return this.http.patch<any>(`${environment.url}usuario-turno/${id}`, dto)
-    .pipe(
+  getAllTurnos() {
+    return this.http.get<any[]>(`${environment.url}turno`);
+  }
+
+  verificarSuperposicionTurno(
+    usuarioFK: number, 
+    fechaInicio: Date, 
+    fechaFin: Date, 
+    turnoActualId?: number // Hacer el parámetro opcional
+  ): Observable<any> {
+    return this.http.post<any>(`${environment.url}usuario-turno/verificar-superposicion`, {
+      usuarioFK,
+      fechaInicio,
+      fechaFin,
+      turnoActualId // Incluir el ID del turno actual si existe
+    }).pipe(
       catchError(error => {
-        console.error('Error al actualizar turno:', error);
-        // Reenviamos el error para que lo maneje el componente
-        return throwError(() => error);
+        console.error('Error al verificar superposición:', error);
+        return throwError(() => ({
+          message: error.error?.message || 'Error al verificar superposición de turnos',
+          error: error
+        }));
       })
     );
-}
+  }
 
-getAllTurnos() {
-  return this.http.get<any[]>(`${environment.url}turno`);
-}
-
-
+  eliminarMultiplesTurnos(ids: number[]) {
+    return this.http.post<any>(`${environment.url}usuario-turno/delete-multiple`, { ids })
+      .pipe(
+        catchError(error => {
+          console.error('Error al eliminar turnos:', error);
+          return throwError(() => ({
+            message: error.error?.message || 'Error al eliminar los turnos seleccionados',
+            error: error
+          }));
+        })
+      );
+  }
 }
 
