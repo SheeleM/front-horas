@@ -713,9 +713,9 @@ procesarActualizacionTurno(turnoFK: number, usuarioFK: number, fechaInicio: Date
     usuarioFK,
     fechaInicio,
     fechaFin,
-    horaInicio: this.AsignacionTurnoForm.get('horaInicio')?.value || null,
-    horaFin: this.AsignacionTurnoForm.get('horaFin')?.value || null,
-    nombre: this.AsignacionTurnoForm.get('nombre')?.value || null
+    //horaInicio: this.AsignacionTurnoForm.get('horaInicio')?.value || null,
+    //horaFin: this.AsignacionTurnoForm.get('horaFin')?.value || null,
+   // nombre: this.AsignacionTurnoForm.get('nombre')?.value || null
   };
 
   this.registroTurnoService.updateUsuarioTurno(this.turnoEditId, turnoActualizado)

@@ -11,10 +11,10 @@ export interface MaestroHoraLegal {
   id: number;
   codigoHoraExtra: string;
   descripcion: string;
-  horaInicio: Date;
-  horaFin: Date;
-  horaInicio2: Date;
-  horaFin2: Date;
+  horaInicio: string;
+  horaFin: string;
+  horaInicio2: string;
+  horaFin2: string;
 }
 
 export interface GetMaestroHoraLegal {
@@ -63,8 +63,8 @@ export class MaestroHoraLegalComponent implements OnInit {
       descripcion: new FormControl('', [Validators.required]),
       horaInicio: new FormControl('', [Validators.required]),
       horaFin: new FormControl('', [Validators.required]),
-      horaInicio2: new FormControl('', [Validators.required]),
-      horaFin2: new FormControl('', [Validators.required])
+      horaInicio2: new FormControl(''),
+      horaFin2: new FormControl('')
     });
 
     // Suscribirse a los cambios del formulario
@@ -99,24 +99,26 @@ export class MaestroHoraLegalComponent implements OnInit {
   }
 
   private extraerHora(valor: string): string {
-    // Si el valor es tipo "2025-12-27T14:00:00", devuelve "14:00"
-    if (valor && valor.includes('T')) {
-      const horaMin = valor.split('T')[1]?.substring(0,5);
-      return horaMin || '';
+    if (!valor) return '';
+    // Si el valor es tipo "2025-12-27T14:00:00", extrae "14:00"
+    if (valor.includes('T')) {
+      return valor.split('T')[1]?.substring(0, 5) || '';
     }
-    return valor || '';
+    // Si el valor ya tiene segundos (HH:mm:ss), quítalos
+    if (valor.length === 8) {
+      return valor.substring(0, 5);
+    }
+    return valor;
   }
   
   onSubmit(): void {
     if (this.horaLegalForm.valid) {
       const formValue = this.horaLegalForm.value;
-      const hoy = new Date();
-      const fechaBase = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
       
       const formatHora = (hora: string) => {
-        if (!hora) return new Date();
-        const [h, m] = hora.split(':');
-        return new Date(`${fechaBase}T${h}:${m}:00`);
+        if (!hora) return null;
+        // Asegurarse de que solo devuelva HH:mm
+        return hora.substring(0, 5);
       };
 
       const datos = {
