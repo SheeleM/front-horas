@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { MaestroTurnoService } from './services/maestroTurno.service';
+import { MatIconModule } from '@angular/material/icon';
 
 interface Turno {
   idTurno?: number;
@@ -28,7 +29,7 @@ interface PaginatedResponse {
 @Component({
   selector: 'app-maestro-turno',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, MatIconModule],
   templateUrl: './maestro-turno.component.html',
   styleUrl: './maestro-turno.component.css'
 })

@@ -198,12 +198,14 @@
             <td>{{ turno.codigo }}</td>
             <td>{{ turno.turno.nombre || 'Sin descripción' }}</td>
             <td>
-              <button mat-icon-button class="boton-editar" aria-label="Editar" (click)="editarTurno(turno)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button class="boton-eliminar" aria-label="Eliminar" (click)="eliminarTurno(turno.idUsuarioTurno, i)">
-                <img src="https://cdn.jsdelivr.net/npm/@mdi/svg/svg/delete.svg" alt="Eliminar" width="15" height="15" style="filter: invert(1);" />
-              </button>
+              <div class="acciones-container">
+                <button mat-icon-button color="primary"  (click)="editarTurno(turno)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="eliminarTurno(turno.idUsuarioTurno, i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

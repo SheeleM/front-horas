@@ -193,19 +193,26 @@
                 <td>{{ turno.diaInicio }}</td>
                 <td>{{ turno.horaFin | date : "HH:mm" }}</td>
                 <td>{{ turno.diaFin }}</td>
+           
                 <td>
-                  <button
-                    class="btn btn-sm btn-icon me-2"
-                    (click)="editarTurno(turno)"
-                  >
-                    <i class="fas fa-pencil-alt"></i>
-                  </button>
-                  <button
-                    class="btn btn-sm btn-icon"
-                    (click)="eliminarTurno(turno.idTurno!)"
-                  >
-                    <i class="fas fa-times"></i>
-                  </button>
+                  <div class="acciones-container">
+                    <button
+                      type="button"
+                      class="boton-editar"
+                      (click)="editarTurno(turno)"
+                      title="Editar turno"
+                    >
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button
+                      type="button"
+                      class="boton-eliminar"
+                      (click)="eliminarTurno(turno.idTurno!)"
+                      title="Eliminar turno"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
                 </td>
               </tr>
               } @empty {

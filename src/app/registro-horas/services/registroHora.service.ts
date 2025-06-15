@@ -1,7 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { FiltrosHorasExtra } from '../registro-horas.component';
 
 // Interface para las horas extra
 interface HoraExtra {
@@ -56,11 +57,26 @@ export class lregistroHoraService {
   /**
    * Obtiene todas las horas extra del usuario autenticado
    * @returns Observable con el array de horas extra
-   */
+   *//*
   obtenerHorasExtras(): Observable<HoraExtra[]> {
     return this.http.get<HoraExtra[]>(this.apiUrl);
+  }*/
+// 3. ACTUALIZAR EL SERVICIO obtenerHorasExtras()
+obtenerHorasExtras(filtros: FiltrosHorasExtra): Observable<HoraExtra[]> {
+  let params = new HttpParams()
+    .set('fechaDesde', filtros.fechaDesde)
+    .set('fechaHasta', filtros.fechaHasta);
+
+  // Convert array of states to comma-separated string
+  if (filtros.estado && filtros.estado.length > 0) {
+    params = params.set('estados', filtros.estado.join(','));
   }
 
+  console.log('Obteniendo horas extras con filtros:', filtros);
+  console.log('Parámetros HTTP enviados:', params.toString());
+  
+  return this.http.get<HoraExtra[]>(this.apiUrl, { params });
+}
   /**
    * Obtiene una hora extra específica por ID
    * @param id ID de la hora extra

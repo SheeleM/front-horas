@@ -111,72 +111,16 @@
   }
 }
 
-.acciones-iconos {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 5px;
-  gap: 12px; /* Espacio entre botones */
-}
 
-.acciones-iconos .mat-icon-button {
-  min-width: 28px;
-  height: 50px;
-  width: 28px;
-  padding: 0;
-}
+
 
 .acciones-iconos .mat-icon {
   line-height: 16px;
 
 }
 
-.boton-editar {
-  background-color: #43a047 !important; /* Verde minimalista */
-  color: #ffffff !important;
-  min-width: 24px !important;
-  width: 24px !important;
-  height: 24px !important;
-  padding: 0 !important;
-  border-radius: 50% !important;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 4px;
-  box-shadow: none;
-  border: none;
-  transition: background 0.2s;
-}
 
-.boton-editar:hover {
-  background-color: #2e7031 !important; /* Verde más oscuro al hover */
-}
 
-.boton-editar mat-icon {
-  color: #fff !important;
-}
-
-.boton-eliminar {
-  background-color: #ef5350; /* Gris claro */
-  color: #fdfdfd;            /* Negro suave */
-  min-width: 24px !important;
-  width: 24px !important;
-  height: 24px !important;
-  padding: 0 !important;
-  border-radius: 50% !important;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.boton-editar mat-icon,
-.boton-eliminar mat-icon,
-.boton-eliminar img {
-  font-size: 14px !important;
-  width: 14px !important;
-  height: 14px !important;
-  line-height: 14px !important;
-}
 
 
 
@@ -270,15 +214,6 @@ label {
   border-color: #fbc02d !important; /* Amarillo más fuerte al enfocar */
 }
 
-::ng-deep .blue-bordered-field.mat-mdc-form-field.mat-mdc-form-field-outline .mat-mdc-notched-outline {
-  border-color: #2196f3 !important; /* Azul Material */
-  border-width: 2px;
-  border-radius: 8px;
-}
-
-::ng-deep .blue-bordered-field.mat-mdc-form-field.mat-mdc-form-field-outline.mat-focused .mat-mdc-notched-outline {
-  border-color: #1976d2 !important; /* Azul más intenso al enfocar */
-}
 
 
 #asignacionM{
@@ -472,36 +407,8 @@ select:focus {
   color: #4285F4 !important;
 }
 
-/* Botones de acción */
-.action-button {
-  min-width: 120px;
-  padding: 10px 24px;
-  font-weight: 500;
-  border-radius: 8px;
-  text-transform: uppercase;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-}
 
-/* Personalización del botón primario */
-button[color="primary"] {
-  background-color: #4285F4 !important;
-  color: white !important;
-}
 
-button[color="primary"]:hover {
-  background-color: #3367d6 !important;
-}
-
-/* Personalización del botón de cancelar */
-button[color="warn"] {
-  background-color: #dc3545 !important;
-  color: white !important;
-}
-
-button[color="warn"]:hover {
-  background-color: #c82333 !important;
-}
 
 /* Ajuste de posiciones para filas y columnas */
 .row.gx-3 {
@@ -562,11 +469,7 @@ button[color="warn"]:hover {
     margin-bottom: 15px;
   }
   
-  .action-button + .action-button {
-    margin-left: 0 !important;
-    margin-top: 10px;
-  }
-  
+
   /* Ajuste de tamaños para móvil */
   .form-select, .search-input {
     height: 44px;
@@ -586,4 +489,17 @@ button[color="warn"]:hover {
 }
 
 
+  /* Iconos con colores directos */
+    /* Contenedor para los botones de acciones */
+  .acciones-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0px;
+  }
 
+.table-hover th {
+  background-color: #F1F5FB;
+  font-weight: bold;
+  color: #072D66;
+}

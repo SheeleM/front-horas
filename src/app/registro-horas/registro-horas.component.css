@@ -308,24 +308,7 @@
     margin-right: 10px;
   }
 
-  .boton-editar, .boton-eliminar {
-    width: 35px !important;
-    height: 35px !important;
-    min-width: 28px !important;
-    padding: 0 !important;
-    margin: 0 3px !important;
-    display: inline-flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-  }
-  
-  .boton-editar mat-icon,
-  .boton-eliminar mat-icon {
-    font-size: 20px !important;
-    width: 20px !important;
-    height: 16px !important;
-    line-height: 16px !important;
-  }
+
   
   td mat-icon {
     display: flex !important;
@@ -425,4 +408,61 @@
 .badge-secondary {
   background-color: #6c757d;
   color: white;
+}
+
+/*FILTROS*/
+/* Estilos para los filtros */
+.filtros-form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.filtro-item {
+  flex: 0 1 auto;
+  min-width: 150px;
+}
+
+.btn-limpiar-filtros {
+  height: 38px;
+  padding: 0 15px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-limpiar-filtros mat-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+/* Ajustes para Angular Material */
+::ng-deep .mat-form-field {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+::ng-deep .mat-form-field-wrapper {
+  padding-bottom: 0;
+  margin: 0;
+}
+
+::ng-deep .mat-form-field-flex {
+  padding-top: 0 !important;
+}
+
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-infix {
+  padding: 0.5em 0;
+}
+
+::ng-deep .mat-select-value {
+  padding: 4px 0;
+}
+.example-additional-selection {
+  opacity: 0.75;
+  font-size: 0.75em;
+  line-height: 1;
 }

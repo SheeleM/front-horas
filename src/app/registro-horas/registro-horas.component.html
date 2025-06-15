@@ -1,4 +1,5 @@
 <div class="registro-container">
+  <h1 class="text-center mb-4">Hola Mundo</h1>
   <div class="turno-form-container">
     <div class="card mb-4">
       <div class="card-header bg-white">
@@ -120,12 +121,102 @@
         <h3 class="text-primary mb-0">Horas extras registradas</h3>
       </div>
       <div class="card-body">
+        
+        <!-- ✅ SECCIÓN DE FILTROS CON REACTIVE FORMS -->
+        <div class="filtros-container mb-4">
+          <form [formGroup]="filtrosForm" class="filtros-form">
+            <div class="filtro-item">
+              <label for="fechaDesde" class="form-label">Fecha desde</label>
+              <input
+                id="fechaDesde"
+                type="date"
+                class="form-control"
+                formControlName="fechaDesde"
+              />
+            </div>
+            
+            <div class="filtro-item">
+              <label for="fechaHasta" class="form-label">Fecha hasta</label>
+              <input
+                id="fechaHasta"
+                type="date"
+                class="form-control"
+                formControlName="fechaHasta"
+              />
+            </div>
+            
+   <div class="filtro-item">
+      <mat-form-field>
+        <mat-label>Estados</mat-label>
+        <mat-select formControlName="estados" multiple>
+          <mat-select-trigger>
+            {{ getEstadosSeleccionados() }}
+          </mat-select-trigger>
+          
+          <!-- Opción "Seleccionar todos" -->
+          <mat-option 
+            #allSelected 
+            [value]="'todos'" 
+            (click)="toggleTodosLosEstados()"
+            [class.mat-selected]="isAllSelected()">
+            Todos los estados
+          </mat-option>
+          
+          <!-- Opciones individuales -->
+          <mat-option 
+            *ngFor="let estado of estadosDisponibles" 
+            [value]="estado.valor"
+            (click)="toggleIndividualEstado()">
+            {{ estado.nombre }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    
+            
+            <button
+              type="button"
+              mat-raised-button
+              color="accent"
+              (click)="limpiarFiltros()"
+              class="btn-limpiar-filtros"
+            >
+              <mat-icon>clear</mat-icon>
+              Limpiar
+            </button>
+                    <button
+              type="button"
+              mat-raised-button
+              color="accent"
+              (click)="cargarHorasExtras()"
+              class="btn-limpiar-filtros"
+            >
+              <mat-icon>clear</mat-icon>
+              Buscar
+            </button>
+          </form>
+          
+          <!-- Contador de resultados -->
+          <div class="mt-2">
+            <small class="text-muted">
+              Mostrando {{ dataSource.filteredData.length || dataSource.data.length }} de {{ datosOriginales.length }} registros
+            </small>
+          </div>
+        </div>
+
         <div class="table-responsive">
           <table
             mat-table
             [dataSource]="dataSource"
             class="mat-elevation-z8 table-hover w-100"
           >
+             <!-- Ingeniero -->
+            <ng-container matColumnDef="ingeniero">
+              <th mat-header-cell *matHeaderCellDef>Ingeniero</th>
+              <td mat-cell *matCellDef="let element">
+                {{ element.usuario.fullname}}
+              </td>
+            </ng-container>
             <!-- Fecha -->
             <ng-container matColumnDef="fecha">
               <th mat-header-cell *matHeaderCellDef>Fecha</th>
@@ -138,9 +229,10 @@
             <ng-container matColumnDef="turno">
               <th mat-header-cell *matHeaderCellDef>Turno</th>
               <td mat-cell *matCellDef="let element">
-                {{ element.usuarioTurno?.turno?.codigo || "N/A" }}
+                {{ element.usuarioTurno?.turno?.codigo || "N/A" }} 
               </td>
             </ng-container>
+
 
             <!-- Ticket -->
             <ng-container matColumnDef="ticket">
@@ -183,34 +275,33 @@
             </ng-container>
 
             <!-- Estado -->
-          <!-- ✅ COLUMNA DE ESTADO CORREGIDA -->
-<ng-container matColumnDef="estado">
-  <th mat-header-cell *matHeaderCellDef>Estado</th>
-  <td mat-cell *matCellDef="let element">
-    <!-- ✅ DROPDOWN para administradores -->
-    <div *ngIf="esAdministrador; else estadoSoloLectura">
-      <select
-        class="form-select form-select-sm estado-select"
-        [value]="element.estado"
-        (change)="cambiarEstadoHoraExtra(element, $any($event.target).value)"
-        [class.badge-warning]="element.estado === 'PENDIENTE'"
-        [class.badge-success]="element.estado === 'APROBADA'"
-        [class.badge-danger]="element.estado === 'RECHAZADA'"
-      >
-        <option value="PENDIENTE">Pendiente</option>
-        <option value="APROBADA">Aprobada</option>
-        <option value="RECHAZADA">Rechazada</option>
-      </select>
-    </div>
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let element">
+                <!-- ✅ DROPDOWN para administradores -->
+                <div *ngIf="esAdministrador; else estadoSoloLectura">
+                  <select
+                    class="form-select form-select-sm estado-select"
+                    [value]="element.estado"
+                    (change)="cambiarEstadoHoraExtra(element, $any($event.target).value)"
+                    [class.badge-warning]="element.estado === 'PENDIENTE'"
+                    [class.badge-success]="element.estado === 'APROBADA'"
+                    [class.badge-danger]="element.estado === 'RECHAZADA'"
+                  >
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="APROBADA">Aprobada</option>
+                    <option value="RECHAZADA">Rechazada</option>
+                  </select>
+                </div>
 
-    <!-- ✅ TEMPLATE para consultores (solo lectura) -->
-    <ng-template #estadoSoloLectura>
-      <span [class]="'badge ' + obtenerClaseEstado(element.estado)">
-        {{ element.estado || "PENDIENTE" }}
-      </span>
-    </ng-template>
-  </td>
-</ng-container>
+                <!-- ✅ TEMPLATE para consultores (solo lectura) -->
+                <ng-template #estadoSoloLectura>
+                  <span [class]="'badge ' + obtenerClaseEstado(element.estado)">
+                    {{ element.estado || "PENDIENTE" }}
+                  </span>
+                </ng-template>
+              </td>
+            </ng-container>
 
             <!-- Acciones -->
             <ng-container matColumnDef="acciones">
@@ -249,7 +340,7 @@
                 [attr.colspan]="displayedColumns.length"
                 style="text-align: center; padding: 20px"
               >
-                No hay horas extras registradas.
+                No hay horas extras registradas que coincidan con los filtros aplicados.
               </td>
             </tr>
           </table>
