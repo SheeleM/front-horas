@@ -655,4 +655,7 @@ getEstadosSeleccionados(): string {
       this.filtrosForm.patchValue({ estados: estadosSinTodos });
     }, 0);
   }
+
+  ///ESTADO NUEVO
+  
 }

@@ -1,5 +1,4 @@
 <div class="registro-container">
-  <h1 class="text-center mb-4">Hola Mundo</h1>
   <div class="turno-form-container">
     <div class="card mb-4">
       <div class="card-header bg-white">
@@ -145,53 +144,51 @@
               />
             </div>
             
-   <div class="filtro-item">
-      <mat-form-field>
-        <mat-label>Estados</mat-label>
-        <mat-select formControlName="estados" multiple>
-          <mat-select-trigger>
-            {{ getEstadosSeleccionados() }}
-          </mat-select-trigger>
-          
-          <!-- Opción "Seleccionar todos" -->
-          <mat-option 
-            #allSelected 
-            [value]="'todos'" 
-            (click)="toggleTodosLosEstados()"
-            [class.mat-selected]="isAllSelected()">
-            Todos los estados
-          </mat-option>
-          
-          <!-- Opciones individuales -->
-          <mat-option 
-            *ngFor="let estado of estadosDisponibles" 
-            [value]="estado.valor"
-            (click)="toggleIndividualEstado()">
-            {{ estado.nombre }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-    
+            <div class="filtro-item">
+              <label for="estados" class="form-label">Estado</label>
+              <mat-form-field class="estados" appearance="outline">
+                <mat-select formControlName="estados" multiple>
+                  <mat-select-trigger>
+                    {{ getEstadosSeleccionados() }}
+                  </mat-select-trigger>
+                  
+                  <!-- Opción "Seleccionar todos" -->
+                  <mat-option 
+                    #allSelected 
+                    [value]="'todos'" 
+                    (click)="toggleTodosLosEstados()"
+                    [class.mat-selected]="isAllSelected()">
+                    Todos los estados
+                  </mat-option>
+                  
+                  <!-- Opciones individuales -->
+                  <mat-option 
+                    *ngFor="let estado of estadosDisponibles" 
+                    [value]="estado.valor"
+                    (click)="toggleIndividualEstado()">
+                    {{ estado.nombre }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
             
             <button
               type="button"
               mat-raised-button
-              color="accent"
               (click)="limpiarFiltros()"
               class="btn-limpiar-filtros"
             >
               <mat-icon>clear</mat-icon>
               Limpiar
             </button>
+            
                     <button
               type="button"
               mat-raised-button
-              color="accent"
               (click)="cargarHorasExtras()"
-              class="btn-limpiar-filtros"
+              class="btn-limpiar-filtros1"
             >
-              <mat-icon>clear</mat-icon>
+             
               Buscar
             </button>
           </form>
@@ -307,24 +304,24 @@
             <ng-container matColumnDef="acciones">
               <th mat-header-cell *matHeaderCellDef>Acciones</th>
               <td mat-cell *matCellDef="let element">
-                <button
-                  mat-icon-button
-                  color="primary"
-                  class="boton-editar"
-                  (click)="editarHoraExtra(element)"
-                  matTooltip="Editar"
-                >
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button
-                  mat-icon-button
-                  color="warn"
-                  class="boton-eliminar"
-                  (click)="eliminarHoraExtra(element)"
-                  matTooltip="Eliminar"
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
+                <div class="acciones-container">
+                  <button
+                    mat-icon-button
+                    color="primary"
+                    class="boton-editar"
+                    (click)="editarHoraExtra(element)"
+                    matTooltip="Editar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    class="boton-eliminar"
+                    (click)="eliminarHoraExtra(element)"
+                    matTooltip="Eliminar">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
               </td>
             </ng-container>
 
