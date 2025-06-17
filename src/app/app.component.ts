@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { Router, NavigationEnd,RouterOutlet } from '@angular/router';
 import { SidebarLeftComponent } from "./components/sidebar-left/sidebar-left.component";
-import { SidebarRightComponent } from "./components/sidebar-right/sidebar-right.component";
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatChipsModule } from '@angular/material/chips';
@@ -17,7 +16,7 @@ import { FormControl } from '@angular/forms';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule,RouterOutlet,SidebarLeftComponent, SidebarRightComponent,MatFormFieldModule,[MatChipsModule],MatAutocompleteModule,MatInputModule,MatChipInput
+  imports: [CommonModule,RouterOutlet,SidebarLeftComponent,MatFormFieldModule,[MatChipsModule],MatAutocompleteModule,MatInputModule,MatChipInput
 ,    MatDatepickerModule,
 ] , 
   templateUrl: './app.component.html',

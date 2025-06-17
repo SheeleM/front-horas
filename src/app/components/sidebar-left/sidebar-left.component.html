@@ -1,46 +1,29 @@
-<!-- sidebar.component.html -->
-<div class="sidebar left">
-  <div class="admin-header">
-    <i class="fa fa-user-circle admin-icon"></i>
-    <span>Administrador</span>
-  </div>
-
-  <div class="section-title">Favoritos</div>
-  <ul class="menu-list">
-    <li *ngFor="let item of menuItems.favoritos" 
-        class="menu-item"
-        [routerLink]="item.link"
-        routerLinkActive="active">
-      <i class="fa fa-circle"></i>
-      {{item.title}}
+<aside class="sidebar">
+  <ul class="menu">
+    <li class="menu-item">
+      <a [routerLink]="['/listarUsuario']">
+        <i class="icon">👤</i> Usuarios
+      </a>
+    </li>
+    <li class="menu-item">
+      <a [routerLink]="['/maestroTurno']">
+        <i class="icon">📑</i> Maestro turno
+      </a>
+    </li>
+    <li class="menu-item">
+      <a [routerLink]="['/maestroHoraLegal']">
+        <i class="icon">📝</i> Maestro tipo de hora extra
+      </a>
+    </li>
+    <li class="menu-item">
+      <a [routerLink]="['/RegistroTurno']">
+        <i class="icon">🗓️</i> Gestión de turnos
+      </a>
+    </li>
+    <li class="menu-item">
+      <a [routerLink]="['/registrohora']">
+        <i class="icon">➕</i> Horas extras
+      </a>
     </li>
   </ul>
-
-  <div class="section-title">Tableros</div>
-  <div>
-    <span [routerLink]="['/maestroTurno']" *ngIf="data.rol == 'admin'" style="cursor: pointer; color: rgb(68, 68, 77); ">
-          Maestro turno
-    </span>
-  </div>
-  <div>
-    <span [routerLink]="['/maestroHoraLegal']" style="cursor: pointer; color: rgb(68, 68, 77)">
-    Maestro Tipo de  hora extra
-    </span>
-  </div>
-  <div>
-    <span [routerLink]="['/registrohora']" style="cursor: pointer; color: rgb(68, 68, 77)">
-     Registrar Horas extras
-    </span>
-  </div>
-  <div>
-  <span [routerLink]="['/listarUsuario']" style="cursor: pointer; color: rgb(68, 68, 77)">
-   Usuarios
-  </span>
-</div>
-
-<div>
-  <span [routerLink]="['/RegistroTurno']" *ngIf="data.rol == 'admin'" style="cursor: pointer; color: rgb(68, 68, 77)">
-   AsignacionTurno
-  </span>
-</div>
-</div>
+</aside>
