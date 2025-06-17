@@ -1,6 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import * as ExcelJS from 'exceljs';
+import * as FileSaver from 'file-saver';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,8 +15,7 @@ import {
   FormGroup,
   ReactiveFormsModule,
   Validators,
-   FormsModule, // ✅ Agregar esta línea
-
+  FormsModule, // ✅ Agregar esta línea
 } from '@angular/forms';
 import { lregistroHoraService } from './services/registroHora.service';
 import Swal from 'sweetalert2';
@@ -114,7 +115,7 @@ export interface FiltrosHorasExtra {
   selector: 'app-registro-horas',
   standalone: true,
   imports: [
-  MatSelectModule, // Esto incluye mat-option automáticamente
+    MatSelectModule, // Esto incluye mat-option automáticamente
     ReactiveFormsModule,
     CommonModule,
     MatFormFieldModule,
@@ -142,41 +143,42 @@ export class RegistroHorasComponent {
   filtrosForm: FormGroup = new FormGroup({
     fechaDesde: new FormControl(''),
     fechaHasta: new FormControl(''),
-    estados: new FormControl([]) // Cambiado de 'estado' a 'estados' y es un array
+    estados: new FormControl([]), // Cambiado de 'estado' a 'estados' y es un array
   });
   cargaInicialCompleta: boolean = false;
 
   estadosDisponibles: Estado[] = [
     { valor: 'PENDIENTE', nombre: 'Pendiente', clase: 'badge-warning' },
     { valor: 'APROBADA', nombre: 'Aprobada', clase: 'badge-success' },
-    { valor: 'RECHAZADA', nombre: 'Rechazada', clase: 'badge-danger' }
+    { valor: 'RECHAZADA', nombre: 'Rechazada', clase: 'badge-danger' },
   ];
-    toppings = new FormControl('');
+  toppings = new FormControl('');
 
   toppingList: string[] = ['PENDIENTE', 'APROBADA', 'RECHAZADA'];
 
+  getEstadosSeleccionados(): string {
+    const estadosSeleccionados: string[] =
+      this.filtrosForm.get('estados')?.value || [];
 
-
-getEstadosSeleccionados(): string {
-    const estadosSeleccionados: string[] = this.filtrosForm.get('estados')?.value || [];
-    
     if (!estadosSeleccionados || estadosSeleccionados.length === 0) {
       return 'Seleccionar estados';
     }
-    
+
     if (estadosSeleccionados.length === this.estadosDisponibles.length) {
       return 'Todos los estados';
     }
-    
+
     if (estadosSeleccionados.length === 1) {
-      const estado = this.estadosDisponibles.find(e => e.valor === estadosSeleccionados[0]);
+      const estado = this.estadosDisponibles.find(
+        (e) => e.valor === estadosSeleccionados[0]
+      );
       return estado?.nombre || estadosSeleccionados[0];
     }
-    
+
     return `${estadosSeleccionados.length} estados seleccionados`;
   }
 
-    // ✅ MÉTODO PARA VERIFICAR SI TODOS ESTÁN SELECCIONADOS
+  // ✅ MÉTODO PARA VERIFICAR SI TODOS ESTÁN SELECCIONADOS
   isAllSelected(): boolean {
     const estadosSeleccionados = this.filtrosForm.get('estados')?.value || [];
     return estadosSeleccionados.length === this.estadosDisponibles.length;
@@ -218,7 +220,6 @@ getEstadosSeleccionados(): string {
     this.cargarInformacionUsuario(); // ✅ Cargar información del usuario
   }
 
-
   // ✅ CORREGIR: Método cargarHorasExtras mejorado
   cargarHorasExtras(): void {
     const fechaDesde = this.filtrosForm.get('fechaDesde')?.value;
@@ -246,19 +247,15 @@ getEstadosSeleccionados(): string {
 
     // ✅ OBTENER ESTADOS SELECCIONADOS CORRECTAMENTE
     const estadosFormValue = this.filtrosForm.get('estados')?.value || [];
-    const estadosSeleccionados = estadosFormValue.filter((estado: string) => estado !== 'todos');
-
-    console.log('Cargando horas extras con filtros:', { 
-      fechaDesde, 
-      fechaHasta, 
-      estadosSeleccionados 
-    });
+    const estadosSeleccionados = estadosFormValue.filter(
+      (estado: string) => estado !== 'todos'
+    );
 
     const filtros: FiltrosHorasExtra = {
       fechaDesde,
       fechaHasta,
       // ✅ ENVIAR ESTADOS SOLO SI HAY SELECCIONADOS
-      ...(estadosSeleccionados.length > 0 && { estado: estadosSeleccionados })
+      ...(estadosSeleccionados.length > 0 && { estado: estadosSeleccionados }),
     };
 
     this.registroHoraService.obtenerHorasExtras(filtros).subscribe({
@@ -276,16 +273,16 @@ getEstadosSeleccionados(): string {
 
         // Guardar datos originales
         this.datosOriginales = [...this.horasExtras];
-        
+
         // Actualizar la tabla
         this.dataSource.data = this.horasExtras;
-        
+
         this.cargaInicialCompleta = true;
         console.log('Horas extras procesadas:', this.horasExtras);
       },
       error: (err) => {
         console.error('Error al cargar horas extras:', err);
-        
+
         let errorMessage = 'No se pudieron cargar las horas extras';
         if (err.error?.message) {
           errorMessage = err.error.message;
@@ -627,35 +624,148 @@ getEstadosSeleccionados(): string {
     this.filtrosForm.patchValue({
       fechaDesde: '',
       fechaHasta: '',
-      estados: []
+      estados: [],
     });
     this.dataSource.data = [...this.datosOriginales];
   }
-   // ✅ NUEVO: Toggle para "Todos los estados"
+  // ✅ NUEVO: Toggle para "Todos los estados"
   toggleTodosLosEstados(): void {
     const estadosActuales = this.filtrosForm.get('estados')?.value || [];
-    
+
     if (this.isAllSelected()) {
       // Si todos están seleccionados, deseleccionar todos
       this.filtrosForm.patchValue({ estados: [] });
     } else {
       // Si no todos están seleccionados, seleccionar todos
-      const todosLosEstados = this.estadosDisponibles.map(estado => estado.valor);
+      const todosLosEstados = this.estadosDisponibles.map(
+        (estado) => estado.valor
+      );
       this.filtrosForm.patchValue({ estados: todosLosEstados });
     }
   }
 
-    toggleIndividualEstado(): void {
+  toggleIndividualEstado(): void {
     // Remover "todos" si existe cuando se selecciona uno individual
     const estadosActuales = this.filtrosForm.get('estados')?.value || [];
-    const estadosSinTodos = estadosActuales.filter((estado: string) => estado !== 'todos');
-    
+    const estadosSinTodos = estadosActuales.filter(
+      (estado: string) => estado !== 'todos'
+    );
+
     // Actualizar el FormControl sin "todos"
     setTimeout(() => {
       this.filtrosForm.patchValue({ estados: estadosSinTodos });
     }, 0);
   }
 
-  ///ESTADO NUEVO
-  
+  ///BAJAR EXCEL
+
+  exportarAExcel(): void {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Horas Extra');
+
+    // Encabezados
+    worksheet.columns = [
+      { header: 'Fecha', key: 'fecha', width: 15 },
+      { header: 'Ingeniero', key: 'ingeniero', width: 25 },
+      { header: 'Turno', key: 'turno', width: 10 },
+      { header: 'Hora Inicio', key: 'horaInicio', width: 12 },
+      { header: 'Hora Fin', key: 'horaFin', width: 12 },
+      { header: 'Tipo de Hora', key: 'tipoHora', width: 20 },
+      { header: 'Tiempo', key: 'tiempo', width: 10 },
+
+      { header: 'Ticket', key: 'ticket', width: 15 },
+
+      { header: 'Estado', key: 'estado', width: 15 },
+    ];
+
+    // ✅ CORRECCIÓN PRINCIPAL: Obtener datos correctamente
+    const data =
+      this.dataSource.filteredData && this.dataSource.filteredData.length > 0
+        ? this.dataSource.filteredData
+        : this.dataSource.data;
+
+    console.log('Datos para exportar:', data); // Para debugging
+
+    // ✅ CORRECCIÓN: Verificar que hay datos antes de procesarlos
+    if (!data || data.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Sin datos',
+        text: 'No hay datos para exportar.',
+      });
+      return;
+    }
+
+    // ✅ CORRECCIÓN: Mapear datos según tu interfaz HoraExtra
+    data.forEach((row: HoraExtra) => {
+      worksheet.addRow({
+        fecha: row.fecha
+          ? new Date(row.fecha).toLocaleDateString('es-ES')
+          : 'N/A',
+        ingeniero: row.usuario?.fullname || 'N/A',
+        turno: row.usuarioTurno?.turno?.codigo || 'N/A',
+        horaInicio: row.horaInicio || 'N/A',
+        horaFin: row.horaFin || 'N/A',
+        tipoHora: row.tipoHora || 'No asignado',
+        tiempo: row.tiempo || '0:00',
+
+        ticket: row.ticket || 'N/A',
+        estado: row.estado || 'PENDIENTE',
+      });
+    });
+
+    // ✅ MEJORA: Estilos para el encabezado
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: '4472C4' },
+    };
+
+    // ✅ MEJORA: Autoajustar el ancho de las columnas
+    worksheet.columns.forEach((column) => {
+      if (column.key) {
+        const maxLength = Math.max(
+          column.header?.length || 0,
+          ...data.map((row) => {
+            const value = row[column.key as keyof HoraExtra];
+            return String(value || '').length;
+          })
+        );
+        column.width = Math.min(Math.max(maxLength + 2, 10), 50);
+      }
+    });
+
+    // ✅ CORRECCIÓN: Mejor manejo de errores en la generación
+    workbook.xlsx
+      .writeBuffer()
+      .then((buffer) => {
+        const blob = new Blob([buffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+
+        const fechaActual = new Date().toISOString().slice(0, 10);
+        const nombreArchivo = `Horas_Extras_${fechaActual}.xlsx`;
+
+        FileSaver.saveAs(blob, nombreArchivo);
+
+        // ✅ CONFIRMACIÓN AL USUARIO
+        Swal.fire({
+          icon: 'success',
+          title: 'Descarga exitosa',
+          text: `Se descargó el archivo: ${nombreArchivo}`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      })
+      .catch((error) => {
+        console.error('Error al generar Excel:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo generar el archivo Excel',
+        });
+      });
+  }
 }

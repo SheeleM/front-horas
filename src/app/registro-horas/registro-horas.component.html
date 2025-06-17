@@ -120,7 +120,6 @@
         <h3 class="text-primary mb-0">Horas extras registradas</h3>
       </div>
       <div class="card-body">
-        
         <!-- ✅ SECCIÓN DE FILTROS CON REACTIVE FORMS -->
         <div class="filtros-container mb-4">
           <form [formGroup]="filtrosForm" class="filtros-form">
@@ -133,7 +132,7 @@
                 formControlName="fechaDesde"
               />
             </div>
-            
+
             <div class="filtro-item">
               <label for="fechaHasta" class="form-label">Fecha hasta</label>
               <input
@@ -143,7 +142,7 @@
                 formControlName="fechaHasta"
               />
             </div>
-            
+
             <div class="filtro-item">
               <label for="estados" class="form-label">Estado</label>
               <mat-form-field class="estados" appearance="outline">
@@ -151,27 +150,29 @@
                   <mat-select-trigger>
                     {{ getEstadosSeleccionados() }}
                   </mat-select-trigger>
-                  
+
                   <!-- Opción "Seleccionar todos" -->
-                  <mat-option 
-                    #allSelected 
-                    [value]="'todos'" 
+                  <mat-option
+                    #allSelected
+                    [value]="'todos'"
                     (click)="toggleTodosLosEstados()"
-                    [class.mat-selected]="isAllSelected()">
+                    [class.mat-selected]="isAllSelected()"
+                  >
                     Todos los estados
                   </mat-option>
-                  
+
                   <!-- Opciones individuales -->
-                  <mat-option 
-                    *ngFor="let estado of estadosDisponibles" 
+                  <mat-option
+                    *ngFor="let estado of estadosDisponibles"
                     [value]="estado.valor"
-                    (click)="toggleIndividualEstado()">
+                    (click)="toggleIndividualEstado()"
+                  >
                     {{ estado.nombre }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
-            
+
             <button
               type="button"
               mat-raised-button
@@ -181,22 +182,25 @@
               <mat-icon>clear</mat-icon>
               Limpiar
             </button>
-            
-                    <button
+            <button
               type="button"
               mat-raised-button
               (click)="cargarHorasExtras()"
               class="btn-limpiar-filtros1"
             >
-             
               Buscar
             </button>
+            <button  (click)="exportarAExcel()" class="btn-limpiar-filtros1">
+              <mat-icon>download</mat-icon> Exportar a Excel
+            </button>
           </form>
-          
+
           <!-- Contador de resultados -->
           <div class="mt-2">
             <small class="text-muted">
-              Mostrando {{ dataSource.filteredData.length || dataSource.data.length }} de {{ datosOriginales.length }} registros
+              Mostrando
+              {{ dataSource.filteredData.length || dataSource.data.length }} de
+              {{ datosOriginales.length }} registros
             </small>
           </div>
         </div>
@@ -207,11 +211,11 @@
             [dataSource]="dataSource"
             class="mat-elevation-z8 table-hover w-100"
           >
-             <!-- Ingeniero -->
+            <!-- Ingeniero -->
             <ng-container matColumnDef="ingeniero">
               <th mat-header-cell *matHeaderCellDef>Ingeniero</th>
               <td mat-cell *matCellDef="let element">
-                {{ element.usuario.fullname}}
+                {{ element.usuario.fullname }}
               </td>
             </ng-container>
             <!-- Fecha -->
@@ -226,10 +230,9 @@
             <ng-container matColumnDef="turno">
               <th mat-header-cell *matHeaderCellDef>Turno</th>
               <td mat-cell *matCellDef="let element">
-                {{ element.usuarioTurno?.turno?.codigo || "N/A" }} 
+                {{ element.usuarioTurno?.turno?.codigo || "N/A" }}
               </td>
             </ng-container>
-
 
             <!-- Ticket -->
             <ng-container matColumnDef="ticket">
@@ -280,7 +283,9 @@
                   <select
                     class="form-select form-select-sm estado-select"
                     [value]="element.estado"
-                    (change)="cambiarEstadoHoraExtra(element, $any($event.target).value)"
+                    (change)="
+                      cambiarEstadoHoraExtra(element, $any($event.target).value)
+                    "
                     [class.badge-warning]="element.estado === 'PENDIENTE'"
                     [class.badge-success]="element.estado === 'APROBADA'"
                     [class.badge-danger]="element.estado === 'RECHAZADA'"
@@ -310,7 +315,8 @@
                     color="primary"
                     class="boton-editar"
                     (click)="editarHoraExtra(element)"
-                    matTooltip="Editar">
+                    matTooltip="Editar"
+                  >
                     <mat-icon>edit</mat-icon>
                   </button>
                   <button
@@ -318,7 +324,8 @@
                     color="warn"
                     class="boton-eliminar"
                     (click)="eliminarHoraExtra(element)"
-                    matTooltip="Eliminar">
+                    matTooltip="Eliminar"
+                  >
                     <mat-icon>delete</mat-icon>
                   </button>
                 </div>
@@ -337,7 +344,8 @@
                 [attr.colspan]="displayedColumns.length"
                 style="text-align: center; padding: 20px"
               >
-                No hay horas extras registradas que coincidan con los filtros aplicados.
+                No hay horas extras registradas que coincidan con los filtros
+                aplicados.
               </td>
             </tr>
           </table>
