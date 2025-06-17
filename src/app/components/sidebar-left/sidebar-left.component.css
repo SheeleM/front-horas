@@ -20,7 +20,6 @@ html, body {
 /* Lista del menú sin espacios */
 .menu {
   list-style: none;
-  margin: 0;
   padding: 0;
 }
 
@@ -39,12 +38,52 @@ html, body {
   font-size: 18px;
 }
 
+.menu-item a {
+  text-decoration: none;  /* Quita el subrayado */
+  color: white;          /* Color blanco para el texto */
+  width: 100%;          /* Ocupa todo el ancho disponible */
+  display: flex;        /* Para alinear el icono y texto */
+  align-items: center;  /* Alineación vertical */
+}
+
 .menu-item:hover {
   background-color: white;
   color: #1877f2;
 }
 
+.menu-item:hover a {
+  color: #1877f2;  /* Color azul al pasar el mouse */
+}
+
 .menu-item.active {
   background-color: white;
   color: #1877f2;
+}
+
+.profile-section {
+  text-align: center;
+  padding: 10px 0;
+  padding-top: 20px;
+}
+
+.profile-pic {
+  width: 120px;         /* Aumentado el tamaño */
+  height: 120px;        /* Aumentado el tamaño */
+  border-radius: 50%;   /* Mantiene la forma circular */
+  object-fit: contain;  /* Cambiado a contain para mantener la proporción */
+  margin-bottom: 10px;
+  background-color: white; /* Fondo blanco para logos transparentes */
+  padding: 5px;        /* Espacio alrededor del logo */
+}
+
+.username {
+  font-weight: bold;
+  font-size: 16px;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.role {
+  font-size: 13px;
+  color: #cfd8dc;
 }
