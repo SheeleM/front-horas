@@ -82,6 +82,28 @@
             </div>
           </div>
 
+          <div class="row gx-3 mb-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>FESTIVO</label>
+                <mat-slide-toggle
+                  [checked]="registroHoraForm.get('esFestivo')?.value"
+                  (change)="onToggleChange('esFestivo', $event)"
+                  formControlName="esFestivo"
+                ></mat-slide-toggle>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>DOMINGO</label>
+                <mat-slide-toggle
+                  [checked]="registroHoraForm.get('esDomingo')?.value"
+                  (change)="onToggleChange('esDomingo', $event)"
+                  formControlName="esDomingo"
+                ></mat-slide-toggle>
+              </div>
+            </div>
+          </div>
           <!-- Botones alineados a la derecha -->
           <div
             class="agregar-btn-right mt-4 mb-4"
@@ -123,25 +145,18 @@
         <!-- ✅ SECCIÓN DE FILTROS CON REACTIVE FORMS -->
         <div class="filtros-container mb-4">
           <form [formGroup]="filtrosForm" class="filtros-form">
-            <div class="filtro-item">
-              <label for="fechaDesde" class="form-label">Fecha desde</label>
-              <input
-                id="fechaDesde"
-                type="date"
-                class="form-control"
-                formControlName="fechaDesde"
-              />
-            </div>
+         
 
-            <div class="filtro-item">
-              <label for="fechaHasta" class="form-label">Fecha hasta</label>
-              <input
-                id="fechaHasta"
-                type="date"
-                class="form-control"
-                formControlName="fechaHasta"
-              />
-            </div>
+       <div class="filtro-item">
+  <label for="mesSeleccionado" class="form-label">Mes</label>
+  <input
+    id="mesSeleccionado"
+    type="month"
+    class="form-control"
+    formControlName="mesSeleccionado"
+  />
+</div>
+
 
             <div class="filtro-item">
               <label for="estados" class="form-label">Estado</label>
@@ -190,7 +205,7 @@
             >
               Buscar
             </button>
-            <button  (click)="exportarAExcel()" class="btn-limpiar-filtros1">
+            <button (click)="exportarAExcel()" class="btn-limpiar-filtros1">
               <mat-icon>download</mat-icon> Exportar a Excel
             </button>
           </form>
@@ -305,6 +320,23 @@
               </td>
             </ng-container>
 
+     <!-- Domingo -->
+<ng-container matColumnDef="esDomingo">
+  <th mat-header-cell *matHeaderCellDef> DOMINGO </th>
+  <td mat-cell *matCellDef="let element">
+    {{ element.esDomingo ? 'Sí' : 'No' }}
+  </td>
+</ng-container>
+
+
+        <!-- Festivo -->
+<ng-container matColumnDef="esFestivo">
+  <th mat-header-cell *matHeaderCellDef> FESTIVO </th>
+  <td mat-cell *matCellDef="let element">
+    {{ element.esFestivo ? 'Sí' : 'No' }}
+  </td>
+</ng-container>
+
             <!-- Acciones -->
             <ng-container matColumnDef="acciones">
               <th mat-header-cell *matHeaderCellDef>Acciones</th>
@@ -354,3 +386,4 @@
     </div>
   </div>
 </div>
+

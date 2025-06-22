@@ -21,6 +21,7 @@ import { lregistroHoraService } from './services/registroHora.service';
 import Swal from 'sweetalert2';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 // Interface actualizada para coincidir con la respuesta del backend
 export interface HoraExtra {
@@ -35,6 +36,8 @@ export interface HoraExtra {
   turno: number;
   fechaCreacion: string;
   fechaActualizacion: string;
+  esFestivo?: boolean;
+  esDomingo?: boolean;
   tipoHoraExtra?: {
     id: number;
     codigoHoraExtra: string;
@@ -110,6 +113,7 @@ export interface FiltrosHorasExtra {
   fechaDesde: string;
   fechaHasta: string;
   estado?: string[];
+  //mesSeleccionado?:string;
 }
 @Component({
   selector: 'app-registro-horas',
@@ -126,6 +130,8 @@ export interface FiltrosHorasExtra {
     MatButtonModule,
     MatTableModule,
     MatTooltipModule,
+    MatSlideToggleModule,
+    
   ],
   templateUrl: './registro-horas.component.html',
   styleUrl: './registro-horas.component.css',
@@ -140,12 +146,14 @@ export class RegistroHorasComponent {
   filtroFechaHasta: string = '';
   filtroEstado: string = '';
   datosOriginales: any[] = []; // Para guardar los datos sin filtrar
-  filtrosForm: FormGroup = new FormGroup({
-    fechaDesde: new FormControl(''),
-    fechaHasta: new FormControl(''),
-    estados: new FormControl([]), // Cambiado de 'estado' a 'estados' y es un array
-  });
+
   cargaInicialCompleta: boolean = false;
+
+  filtrosForm: FormGroup = new FormGroup({
+  mesSeleccionado: new FormControl(''), // 👈 nuevo
+  estados: new FormControl([]),
+});
+
 
   estadosDisponibles: Estado[] = [
     { valor: 'PENDIENTE', nombre: 'Pendiente', clase: 'badge-warning' },
@@ -189,16 +197,18 @@ export class RegistroHorasComponent {
   // ✅ CORREGIDO: Inicializar dataSource correctamente
   dataSource = new MatTableDataSource<HoraExtra>();
   displayedColumns: string[] = [
-    'ingeniero',
-    'fecha',
-    'turno',
-    'ticket',
-    'horaInicio',
-    'horaFin',
-    'tiempo',
-    'tipoHora',
-    'estado',
-    'acciones',
+  'ingeniero',
+  'fecha',
+  'turno',
+  'ticket',
+  'horaInicio',
+  'horaFin',
+  'tiempo',
+  'tipoHora',
+  'esFestivo',  // ✅ NUEVA COLUMNA
+  'esDomingo',  // ✅ NUEVA COLUMNA
+  'estado',
+  'acciones',
   ];
   editandoId: number | null = null;
 
@@ -212,6 +222,8 @@ export class RegistroHorasComponent {
       fecha: new FormControl('', [Validators.required]),
       horaInicio: new FormControl('', [Validators.required]),
       horaFin: new FormControl('', [Validators.required]),
+      esFestivo: new FormControl(false), // Inicializar con valor booleano
+      esDomingo: new FormControl(false)  // Inicializar con valor booleano
     });
   }
 
@@ -222,41 +234,37 @@ export class RegistroHorasComponent {
 
   // ✅ CORREGIR: Método cargarHorasExtras mejorado
   cargarHorasExtras(): void {
-    const fechaDesde = this.filtrosForm.get('fechaDesde')?.value;
-    const fechaHasta = this.filtrosForm.get('fechaHasta')?.value;
+  //  const fechaDesde = this.filtrosForm.get('fechaDesde')?.value;
+   // const fechaHasta = this.filtrosForm.get('fechaHasta')?.value;
 
-    // Validar que las fechas estén presentes
-    if (!fechaDesde || !fechaHasta) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Fechas requeridas',
-        text: 'Por favor selecciona un rango de fechas para consultar.',
-      });
-      return;
-    }
-
-    // Validar que fechaDesde <= fechaHasta
-    if (new Date(fechaDesde) > new Date(fechaHasta)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Rango de fechas inválido',
-        text: 'La fecha desde no puede ser mayor que la fecha hasta.',
-      });
-      return;
-    }
-
+ 
     // ✅ OBTENER ESTADOS SELECCIONADOS CORRECTAMENTE
-    const estadosFormValue = this.filtrosForm.get('estados')?.value || [];
-    const estadosSeleccionados = estadosFormValue.filter(
-      (estado: string) => estado !== 'todos'
-    );
+  const mesSeleccionado = this.filtrosForm.get('mesSeleccionado')?.value;
 
-    const filtros: FiltrosHorasExtra = {
-      fechaDesde,
-      fechaHasta,
-      // ✅ ENVIAR ESTADOS SOLO SI HAY SELECCIONADOS
-      ...(estadosSeleccionados.length > 0 && { estado: estadosSeleccionados }),
-    };
+
+if (!mesSeleccionado) {
+  Swal.fire({
+    icon: 'warning',
+    title: 'Mes requerido',
+    text: 'Por favor selecciona un mes.',
+  });
+  return;
+}
+
+
+  const [anio, mes] = mesSeleccionado.split('-').map(Number);
+  const fechaDesde = new Date(anio, mes - 1, 1);
+  const fechaHasta = new Date(anio, mes, 0); // Último día del mes
+
+  const estadosFormValue = this.filtrosForm.get('estados')?.value || [];
+  const estadosSeleccionados = estadosFormValue.filter((estado: string) => estado !== 'todos');
+
+  const filtros = {
+    fechaDesde: fechaDesde.toISOString().split('T')[0],
+    fechaHasta: fechaHasta.toISOString().split('T')[0],
+    ...(estadosSeleccionados.length > 0 && { estado: estadosSeleccionados }),
+  };
+
 
     this.registroHoraService.obtenerHorasExtras(filtros).subscribe({
       next: (horasExtras: any[]) => {
@@ -269,6 +277,8 @@ export class RegistroHorasComponent {
           tiempo: this.calcularTiempoTrabajado(hora.horaInicio, hora.horaFin),
           horaInicio: this.formatearHoraParaMostrar(hora.horaInicio),
           horaFin: this.formatearHoraParaMostrar(hora.horaFin),
+       esFestivo: Boolean(hora.esFestivo), // Convierte a boolean
+        esDomingo: Boolean(hora.esDomingo)  // Convierte a boolean
         }));
 
         // Guardar datos originales
@@ -447,6 +457,8 @@ export class RegistroHorasComponent {
       fecha: this.convertirFechaParaInput(element.fecha),
       horaInicio: element.horaInicio,
       horaFin: element.horaFin,
+      esFestivo: !!element.esFestivo,
+      esDomingo: !!element.esDomingo
     });
   }
 
@@ -508,6 +520,26 @@ export class RegistroHorasComponent {
 
   get horaFinInvalid() {
     const control = this.registroHoraForm.get('horaFin');
+    return control?.invalid && control?.touched;
+  } 
+    get horaInicio2Invalid() {
+    const control = this.registroHoraForm.get('horaInicio2');
+    return control?.invalid && control?.touched;
+  }
+
+  get horaFin2Invalid() {
+    const control = this.registroHoraForm.get('horaFin2');
+    return control?.invalid && control?.touched;
+  }
+
+  
+  get esFestivoInvalid() {
+    const control = this.registroHoraForm.get('esFestivo');
+    return control?.invalid && control?.touched;
+  }
+
+  get esDomingoInvalid() {
+    const control = this.registroHoraForm.get('esDomingo');
     return control?.invalid && control?.touched;
   }
 
@@ -767,5 +799,13 @@ export class RegistroHorasComponent {
           text: 'No se pudo generar el archivo Excel',
         });
       });
+  }
+
+  // Agregar este nuevo método para manejar los cambios en los toggles
+  onToggleChange(controlName: 'esFestivo' | 'esDomingo', event: any): void {
+    this.registroHoraForm.patchValue({
+      [controlName]: event.checked
+    });
+    console.log(`${controlName} changed to:`, event.checked);
   }
 }

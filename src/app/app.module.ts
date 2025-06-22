@@ -37,6 +37,8 @@ import { MatDividerModule } from '@angular/material/divider';
     MatTableModule,
     MatTooltipModule,
     MatDividerModule,
+        BrowserAnimationsModule,
+
   ],
   providers: [],
   bootstrap: [AppComponent],

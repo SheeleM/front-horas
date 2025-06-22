@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MaestroHoraExtraLegalService } from './services/maestroLegal.service';
 import Swal from 'sweetalert2';
 
@@ -15,6 +16,8 @@ export interface MaestroHoraLegal {
   horaFin: string;
   horaInicio2: string;
   horaFin2: string;
+  domingo?: boolean;
+  festivo?: boolean;
 }
 
 export interface GetMaestroHoraLegal {
@@ -35,7 +38,8 @@ export interface GetMaestroHoraLegal {
     CommonModule,
     MatTableModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatSlideToggleModule
   ],
   templateUrl: './maestro-hora-legal.component.html',
   styleUrl: './maestro-hora-legal.component.css'
@@ -52,8 +56,10 @@ export class MaestroHoraLegalComponent implements OnInit {
     'descripcion',
     'horaInicio',
     'horaFin',
-     'horaInicio2',
+    'horaInicio2',
     'horaFin2',
+    'esDomingo',
+    'esFestivo',
     'acciones'
   ];
 
@@ -64,7 +70,9 @@ export class MaestroHoraLegalComponent implements OnInit {
       horaInicio: new FormControl('', [Validators.required]),
       horaFin: new FormControl('', [Validators.required]),
       horaInicio2: new FormControl(''),
-      horaFin2: new FormControl('')
+      horaFin2: new FormControl(''),
+      esFestivo:new FormControl(false),
+      esDomingo: new FormControl(false)
     });
 
     // Suscribirse a los cambios del formulario
@@ -75,21 +83,30 @@ export class MaestroHoraLegalComponent implements OnInit {
 
   ngOnInit(): void {
     this.listarHorasLegales();
+    console.log('Componente inicializado'); // Debug
   }
 
+  // Actualiza el método listarHorasLegales para asegurarse de que los datos se mapeen correctamente
   listarHorasLegales(): void {
     this.maestroHoraLegalService.ListarHorasLegal().subscribe({
       next: (data: any) => {
         console.log('Datos recibidos del backend:', data);
         
-        // Si el backend devuelve un array de objetos con las propiedades correctas
-        if (Array.isArray(data)) {
-          this.dataSource.data = data as GetMaestroHoraLegal[];
-        } else if (data && data.data && Array.isArray(data.data)) {
-          this.dataSource.data = data.data as GetMaestroHoraLegal[];
-        } else {
-          this.dataSource.data = [];
-        }
+        // Transformar los datos antes de asignarlos
+        const transformedData = Array.isArray(data) ? data : (data?.data || []);
+        
+        // Asegurar que cada registro tenga todas las propiedades necesarias
+        this.dataSource.data = transformedData.map((item: any) => ({
+          ...item,
+          horaInicio: this.extraerHora(item.horaInicio),
+          horaFin: this.extraerHora(item.horaFin),
+          horaInicio2: this.extraerHora(item.horaInicio2),
+          horaFin2: this.extraerHora(item.horaFin2),
+          festivo: !!item.festivo,
+          domingo: !!item.domingo
+        }));
+
+        console.log('Datos procesados:', this.dataSource.data);
       },
       error: (err) => {
         console.error('Error al listar horas legales:', err);
@@ -127,7 +144,9 @@ export class MaestroHoraLegalComponent implements OnInit {
         horaInicio: formatHora(formValue.horaInicio),
         horaFin: formatHora(formValue.horaFin),
         horaInicio2: formatHora(formValue.horaInicio2),
-        horaFin2: formatHora(formValue.horaFin2)
+        horaFin2: formatHora(formValue.horaFin2),
+        esFestivo: !!formValue.esFestivo,
+        esDomingo: !!formValue.esDomingo
       };
 
       console.log('Datos a enviar:', datos);
@@ -217,7 +236,9 @@ export class MaestroHoraLegalComponent implements OnInit {
       horaInicio: this.extraerHora(element.horaInicio),
       horaFin: this.extraerHora(element.horaFin),
       horaInicio2: this.extraerHora(element.horaInicio2),
-      horaFin2: this.extraerHora(element.horaFin2)
+      horaFin2: this.extraerHora(element.horaFin2),
+      esFestivo: !!element.esFestivo,
+      esDomingo: !!element.esDomingo
     });
 
     // Marcar los campos como "touched" para activar las validaciones

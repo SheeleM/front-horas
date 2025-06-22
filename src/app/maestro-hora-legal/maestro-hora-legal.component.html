@@ -107,6 +107,30 @@
               </div>
             </div>
           </div>
+
+          <div class="row gx-3 mb-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="horaInicio2">FESTIVO</label>
+            <p><mat-slide-toggle formControlName="esFestivo" labelPosition="before"></mat-slide-toggle></p>
+
+
+                <small class="text-danger" *ngIf="horaInicio2Invalid">
+                  Formato requerido: HH:MM (ej. 08:00)
+                </small>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="horaFin2">DOMINGO</label>
+                         <p><mat-slide-toggle formControlName="esDomingo" labelPosition="before"></mat-slide-toggle></p>
+
+                <small class="text-danger" *ngIf="horaFin2Invalid">
+                  Formato requerido: HH:MM (ej. 17:00)
+                </small>
+              </div>
+            </div>
+          </div>
           
           <div class="text-center mt-4" style="display: flex; justify-content: flex-end; align-items: center;">
             <button
@@ -135,45 +159,63 @@
       <div class="card-body">
         <div class="table-responsive">
           <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 table-hover w-100">
-
+            
             <!-- Código de hora -->
             <ng-container matColumnDef="codigoHoraExtra">
               <th mat-header-cell *matHeaderCellDef> CÓDIGO DE HORA </th>
-              <td mat-cell *matCellDef="let element"> {{ element.codigoHoraExtra }} </td>
+              <td mat-cell *matCellDef="let element"> {{element.codigoHoraExtra}} </td>
             </ng-container>
 
             <!-- Descripción -->
             <ng-container matColumnDef="descripcion">
               <th mat-header-cell *matHeaderCellDef> DESCRIPCIÓN </th>
-              <td mat-cell *matCellDef="let element"> {{ element.descripcion }} </td>
+              <td mat-cell *matCellDef="let element"> {{element.descripcion}} </td>
             </ng-container>
 
             <!-- Hora inicio -->
             <ng-container matColumnDef="horaInicio">
               <th mat-header-cell *matHeaderCellDef> HORA INICIO </th>
-              <td mat-cell *matCellDef="let element"> {{ element.horaInicio }} </td>
+              <td mat-cell *matCellDef="let element"> {{element.horaInicio}} </td>
             </ng-container>
 
             <!-- Hora fin -->
             <ng-container matColumnDef="horaFin">
               <th mat-header-cell *matHeaderCellDef> HORA FIN </th>
-              <td mat-cell *matCellDef="let element"> {{ element.horaFin }} </td>
+              <td mat-cell *matCellDef="let element"> {{element.horaFin}} </td>
             </ng-container>
 
-                <!-- Hora inicio -->
+            <!-- Hora inicio 2 -->
             <ng-container matColumnDef="horaInicio2">
-              <th mat-header-cell *matHeaderCellDef> HORA INICIO2 </th>
-              <td mat-cell *matCellDef="let element"> {{ element.horaInicio2 }} </td>
+              <th mat-header-cell *matHeaderCellDef> HORA INICIO 2 </th>
+              <td mat-cell *matCellDef="let element"> {{element.horaInicio2}} </td>
             </ng-container>
 
-            <!-- Hora fin -->
+            <!-- Hora fin 2 -->
             <ng-container matColumnDef="horaFin2">
-              <th mat-header-cell *matHeaderCellDef> HORA FIN2 </th>
-              <td mat-cell *matCellDef="let element"> {{ element.horaFin2  }} </td>
+              <th mat-header-cell *matHeaderCellDef> HORA FIN 2 </th>
+              <td mat-cell *matCellDef="let element"> {{element.horaFin2}} </td>
             </ng-container>
+
+     <!-- Domingo -->
+<ng-container matColumnDef="esDomingo">
+  <th mat-header-cell *matHeaderCellDef> DOMINGO </th>
+  <td mat-cell *matCellDef="let element">
+    {{ element.esDomingo ? 'Sí' : 'No' }}
+  </td>
+</ng-container>
+
+
+        <!-- Festivo -->
+<ng-container matColumnDef="esFestivo">
+  <th mat-header-cell *matHeaderCellDef> FESTIVO </th>
+  <td mat-cell *matCellDef="let element">
+    {{ element.esFestivo ? 'Sí' : 'No' }}
+  </td>
+</ng-container>
+
             <!-- Acciones -->
             <ng-container matColumnDef="acciones">
-              <th mat-header-cell *matHeaderCellDef> Acciones </th>
+              <th mat-header-cell *matHeaderCellDef> ACCIONES </th>
               <td mat-cell *matCellDef="let element">
                 <div class="acciones-container">
                   <button mat-icon-button color="primary" class="boton-editar" (click)="editarHoraExtra(element)">
@@ -186,11 +228,9 @@
               </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="bg-light-blue"></tr>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            <tr class="mat-row" *matNoDataRow>
-              <td class="mat-cell" colspan="5">No hay tipos de horas legales registradas.</td>
-            </tr>
+
           </table>
         </div>
       </div>
