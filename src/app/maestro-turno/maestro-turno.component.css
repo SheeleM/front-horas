@@ -4,7 +4,7 @@
     align-items: center;
     min-height: 80vh;
     padding: 20px;
-    background-color: #ffffff;
+    background-color: #ffff;
   }
   
   .form-group {
@@ -41,7 +41,8 @@
   
   .turno-form-container {
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
+  
   }
   
   .card {

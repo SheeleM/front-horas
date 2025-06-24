@@ -9,24 +9,30 @@ import { RegistroHorasComponent } from './registro-horas/registro-horas.componen
 import { authGuard } from './core/guards/auth.guard';
 import { MaestroHoraLegalComponent } from './maestro-hora-legal/maestro-hora-legal.component';
 import { rolesGuard } from './core/guards/roles.guard';
-//crear la ruHomePage
+import { HomeComponent } from './home/home.component';
+
 export const routes: Routes = [
-   { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-    //rolesGuard
-  //  { path: 'registro', component: RegistroComponent ,   canActivate: [authGuard]},
-        { path: 'registro', component: RegistroComponent },
+  { path: 'registro', component: RegistroComponent },
 
-    { path: 'listarUsuario', component: ListarUsuariosComponent ,canActivate: [authGuard],},
-    { path: 'recovery', component: RecuperarPasswordComponent ,canActivate: [authGuard]},
-    { path: 'maestroTurno', component: MaestroTurnoComponent ,canActivate: [authGuard, rolesGuard],
-        data: {
-            roles: ['admin', 'INGENIERO']
-        },
-    },
-    { path: 'RegistroTurno', component: RegistroTurnoComponent , canActivate: [authGuard]},
-    { path: 'registrohora', component: RegistroHorasComponent ,canActivate: [authGuard]},
-    { path: 'maestroHoraLegal', component: MaestroHoraLegalComponent ,canActivate: [authGuard]}
-
-
+  {
+    path: '',
+    component: HomeComponent,
+    canActivate: [authGuard],
+    children: [
+      { path: 'home', component: HomeComponent },
+      { path: 'listarUsuario', component: ListarUsuariosComponent },
+      { path: 'recovery', component: RecuperarPasswordComponent },
+      {
+        path: 'maestroTurno',
+        component: MaestroTurnoComponent,
+        canActivate: [rolesGuard],
+        data: { roles: ['admin', 'INGENIERO'] },
+      },
+      { path: 'RegistroTurno', component: RegistroTurnoComponent },
+      { path: 'registrohora', component: RegistroHorasComponent },
+      { path: 'maestroHoraLegal', component: MaestroHoraLegalComponent },
+    ],
+  },
 ];

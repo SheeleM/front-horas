@@ -127,6 +127,24 @@
                 </small>
               </div>
             </div>
+               <div class="col-md-6">
+              <div class="form-group">
+                <label>Guardia</label>
+                <mat-slide-toggle
+                  [checked]="turnoForm.get('guardia')?.value"
+                  (change)="onToggleChange('guardia', $event)"
+                  formControlName="guardia"
+                ></mat-slide-toggle>
+              </div>
+                 <div class="form-group">
+                <label>Activo</label>
+                <mat-slide-toggle
+                  [checked]="turnoForm.get('activo')?.value"
+                  (change)="onToggleChangeActivo('activo', $event)"
+                  formControlName="activo"
+                ></mat-slide-toggle>
+              </div>
+            </div>
           </div>
 
           <div class="text-center mt-4">
@@ -181,7 +199,10 @@
                 <th scope="col">Día inicio</th>
                 <th scope="col">Hora Fin</th>
                 <th scope="col">Día fin</th>
+                <th scope="col">Guardia</th>
+                <th scope="col">Activo</th>
                 <th scope="col">Acciones</th>
+
               </tr>
             </thead>
             <tbody>
@@ -193,6 +214,9 @@
                 <td>{{ turno.diaInicio }}</td>
                 <td>{{ turno.horaFin | date : "HH:mm" }}</td>
                 <td>{{ turno.diaFin }}</td>
+                <td>{{ turno.guardia ? 'SI' : 'no'}}</td>
+                <td>{{ turno.activo ? 'SI' : 'no'}}</td>
+
            
                 <td>
                   <div class="acciones-container">

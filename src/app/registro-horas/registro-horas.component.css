@@ -4,8 +4,10 @@
     align-items: center;
     min-height: 80vh;
     padding: 20px;
-    background-color: #d3d2d2;
+/*background-color: #eef4f5;*/
   }
+
+
   
   .form-group {
     margin-bottom: 15px;
@@ -47,12 +49,12 @@
   }
   
 .card.mb-4 {
-  background-color: #f2f8f7;
+  background-color: #ffffff;
  /* border-left: 5px solid #4c93af;*/
 }
 
 .card.mt-4 {
-  background-color: #f2f8f7;
+  background-color: #ffffff;
 /*  border-left: 5px solid #4c93af;*/
 }
 

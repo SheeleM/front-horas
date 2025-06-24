@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatChipInput } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { FormControl } from '@angular/forms';
+import { HomeComponent } from './home/home.component';
 
 
 
@@ -17,7 +18,7 @@ import { FormControl } from '@angular/forms';
   selector: 'app-root',
   standalone: true,
   imports: [CommonModule,RouterOutlet,SidebarLeftComponent,MatFormFieldModule,[MatChipsModule],MatAutocompleteModule,MatInputModule,MatChipInput
-,    MatDatepickerModule,
+,    MatDatepickerModule,HomeComponent,
 ] , 
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'

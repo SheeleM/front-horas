@@ -1,10 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 import { MaestroTurnoService } from './services/maestroTurno.service';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface Turno {
   idTurno?: number;
@@ -14,6 +22,8 @@ interface Turno {
   horaInicio: string;
   diaFin: string;
   horaFin: string;
+  guardia: boolean;
+  activo: boolean;
 }
 
 interface PaginatedResponse {
@@ -29,9 +39,15 @@ interface PaginatedResponse {
 @Component({
   selector: 'app-maestro-turno',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, MatIconModule],
+  imports: [
+    ReactiveFormsModule,
+    CommonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatSlideToggleModule,
+  ],
   templateUrl: './maestro-turno.component.html',
-  styleUrl: './maestro-turno.component.css'
+  styleUrl: './maestro-turno.component.css',
 })
 export class MaestroTurnoComponent implements OnInit {
   turnoForm!: FormGroup;
@@ -59,7 +75,9 @@ export class MaestroTurnoComponent implements OnInit {
       diaInicio: ['', Validators.required],
       horaInicio: ['', [Validators.required]],
       diaFin: ['', Validators.required],
-      horaFin: ['', [Validators.required]]
+      horaFin: ['', [Validators.required]],
+      guardia: new FormControl(false),
+      activo: new FormControl(false), // Agregado para manejar el estado activo
     });
   }
 
@@ -85,6 +103,10 @@ export class MaestroTurnoComponent implements OnInit {
     }
 
     const turnoData = { ...this.turnoForm.value };
+    // ✨ Normalizar código antes de enviar
+    if (turnoData.codigo) {
+      turnoData.codigo = turnoData.codigo.trim().toUpperCase();
+    }
     if (turnoData.horaInicio) {
       const [horas, minutos] = turnoData.horaInicio.split(':');
       const horaInicio = new Date();
@@ -109,9 +131,11 @@ export class MaestroTurnoComponent implements OnInit {
         // Si usas paginación, puedes ajustar la página actual si lo deseas
         // this.paginaActual = this.totalPaginas;
       },
-      error: () => {
-        this.mostrarError('El codigo de turno ya esta en uso');
-      }
+error: (err) => {
+  console.error('Error al crear turno:', err);
+  this.mostrarError(err?.error?.message || 'Error al crear el turno');
+}
+
     });
   }
 
@@ -146,7 +170,7 @@ export class MaestroTurnoComponent implements OnInit {
       },
       error: () => {
         this.mostrarError('No se pudo actualizar el turno');
-      }
+      },
     });
   }
 
@@ -169,12 +193,18 @@ export class MaestroTurnoComponent implements OnInit {
 
     if (turno.horaInicio && turno.horaInicio.includes('T')) {
       const fecha = new Date(turno.horaInicio);
-      horaInicio = `${fecha.getHours().toString().padStart(2, '0')}:${fecha.getMinutes().toString().padStart(2, '0')}`;
+      horaInicio = `${fecha.getHours().toString().padStart(2, '0')}:${fecha
+        .getMinutes()
+        .toString()
+        .padStart(2, '0')}`;
     }
 
     if (turno.horaFin && turno.horaFin.includes('T')) {
       const fecha = new Date(turno.horaFin);
-      horaFin = `${fecha.getHours().toString().padStart(2, '0')}:${fecha.getMinutes().toString().padStart(2, '0')}`;
+      horaFin = `${fecha.getHours().toString().padStart(2, '0')}:${fecha
+        .getMinutes()
+        .toString()
+        .padStart(2, '0')}`;
     }
 
     this.turnoForm.patchValue({
@@ -183,7 +213,9 @@ export class MaestroTurnoComponent implements OnInit {
       diaInicio: turno.diaInicio || '',
       horaInicio: horaInicio || '',
       diaFin: turno.diaFin || '',
-      horaFin: horaFin || ''
+      horaFin: horaFin || '',
+      guardia: turno.guardia || false,
+      turno: turno.activo || true, // Asegúrate de que el campo 'activo' esté presente
     });
 
     this.editandoTurno = true;
@@ -200,14 +232,14 @@ export class MaestroTurnoComponent implements OnInit {
 
     Swal.fire({
       title: '¿Estás seguro?',
-      text: "Esta acción no se puede revertir",
+      text: 'Esta acción no se puede revertir',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then(result => {
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
       if (result.isConfirmed) {
         this.maestroTurnoService.eliminarTurno(id).subscribe({
           next: () => {
@@ -216,7 +248,7 @@ export class MaestroTurnoComponent implements OnInit {
           },
           error: () => {
             this.mostrarError('No se pudo eliminar el turno');
-          }
+          },
         });
       }
     });
@@ -234,7 +266,9 @@ export class MaestroTurnoComponent implements OnInit {
 
   // Métodos para buscar y paginar
   buscar(event: Event): void {
-    this.terminoBusqueda = (event.target as HTMLInputElement).value.toLowerCase().trim();
+    this.terminoBusqueda = (event.target as HTMLInputElement).value
+      .toLowerCase()
+      .trim();
     this.paginaActual = 1; // Reset to first page when searching
     this.aplicarFiltro();
   }
@@ -242,18 +276,21 @@ export class MaestroTurnoComponent implements OnInit {
   aplicarFiltro(): void {
     // Filtrar por término de búsqueda
     if (this.terminoBusqueda) {
-      this.turnosFiltrados = this.turnos.filter(turno => 
-        turno.nombre.toLowerCase().includes(this.terminoBusqueda) ||
-        turno.codigo.toLowerCase().includes(this.terminoBusqueda) ||
-        turno.diaInicio.toLowerCase().includes(this.terminoBusqueda) ||
-        turno.diaFin.toLowerCase().includes(this.terminoBusqueda)
+      this.turnosFiltrados = this.turnos.filter(
+        (turno) =>
+          turno.nombre.toLowerCase().includes(this.terminoBusqueda) ||
+          turno.codigo.toLowerCase().includes(this.terminoBusqueda) ||
+          turno.diaInicio.toLowerCase().includes(this.terminoBusqueda) ||
+          turno.diaFin.toLowerCase().includes(this.terminoBusqueda)
       );
     } else {
       this.turnosFiltrados = [...this.turnos];
     }
 
-    this.totalPaginas = Math.ceil(this.turnosFiltrados.length / this.itemsPorPagina);
-    
+    this.totalPaginas = Math.ceil(
+      this.turnosFiltrados.length / this.itemsPorPagina
+    );
+
     if (this.paginaActual > this.totalPaginas) {
       this.paginaActual = this.totalPaginas || 1;
     }
@@ -284,11 +321,13 @@ export class MaestroTurnoComponent implements OnInit {
   }
 
   arregloPaginas(): number[] {
-    return Array(this.totalPaginas).fill(0).map((_, index) => index + 1);
+    return Array(this.totalPaginas)
+      .fill(0)
+      .map((_, index) => index + 1);
   }
 
   private markFormGroupTouched(formGroup: FormGroup) {
-    Object.values(formGroup.controls).forEach(control => {
+    Object.values(formGroup.controls).forEach((control) => {
       control.markAsTouched();
 
       if (control instanceof FormGroup) {
@@ -303,7 +342,7 @@ export class MaestroTurnoComponent implements OnInit {
       title: 'Éxito',
       text: mensaje,
       icon: 'success',
-      confirmButtonText: 'Aceptar'
+      confirmButtonText: 'Aceptar',
     });
   }
 
@@ -312,7 +351,7 @@ export class MaestroTurnoComponent implements OnInit {
       title: 'Error',
       text: mensaje,
       icon: 'error',
-      confirmButtonText: 'Aceptar'
+      confirmButtonText: 'Aceptar',
     });
   }
 
@@ -321,7 +360,7 @@ export class MaestroTurnoComponent implements OnInit {
       title: '¿Olvidaste tu respuesta de seguridad?',
       text: 'Por favor comunícate con el administrador del sistema para restablecer tu cuenta',
       icon: 'info',
-      confirmButtonText: 'OK'
+      confirmButtonText: 'OK',
     });
   }
 
@@ -353,5 +392,29 @@ export class MaestroTurnoComponent implements OnInit {
   get diaFinInvalid() {
     const control = this.turnoForm.get('diaFin');
     return control?.invalid && control?.touched;
+  }
+
+  get guardiaInvalid() {
+    const control = this.turnoForm.get('guardia');
+    return control?.invalid && control?.touched;
+  }
+  get activoInvalid() {
+    const control = this.turnoForm.get('activo');
+    return control?.invalid && control?.touched;
+  }
+
+  // Agregar este nuevo método para manejar los cambios en los toggles
+  onToggleChange(controlName: 'guardia', event: any): void {
+    this.turnoForm.patchValue({
+      [controlName]: event.checked,
+    });
+    console.log(`${controlName} changed to:`, event.checked);
+  }
+
+  onToggleChangeActivo(controlName: 'activo', event: any): void {
+    this.turnoForm.patchValue({
+      [controlName]: event.checked,
+    });
+    console.log(`${controlName} changed to:`, event.checked);
   }
 }

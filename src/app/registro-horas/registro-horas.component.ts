@@ -228,8 +228,18 @@ export class RegistroHorasComponent {
   }
 
   ngOnInit(): void {
+    // Elimina o comenta la siguiente línea si no tienes authService:
+    // const usuarioActual = this.authService.getUsuarioActual();
+    // this.esAdministrador = usuarioActual?.rol === 'ADMIN' || usuarioActual?.rol === 'ADMINISTRADOR';
+    // console.log('Usuario actual:', usuarioActual);
+    // console.log('Es administrador:', this.esAdministrador);
+
+    // ✅ Cargar información del usuario desde localStorage
+    this.cargarInformacionUsuario();
+    console.log('Usuario cargado:', this.usuarioActual);
+    console.log('Es administrador:', this.esAdministrador);
+
     this.cargarHorasExtras();
-    this.cargarInformacionUsuario(); // ✅ Cargar información del usuario
   }
 
   // ✅ CORREGIR: Método cargarHorasExtras mejorado
@@ -241,7 +251,7 @@ export class RegistroHorasComponent {
     // ✅ OBTENER ESTADOS SELECCIONADOS CORRECTAMENTE
   const mesSeleccionado = this.filtrosForm.get('mesSeleccionado')?.value;
 
-
+/*
 if (!mesSeleccionado) {
   Swal.fire({
     icon: 'warning',
@@ -250,7 +260,7 @@ if (!mesSeleccionado) {
   });
   return;
 }
-
+*/
 
   const [anio, mes] = mesSeleccionado.split('-').map(Number);
   const fechaDesde = new Date(anio, mes - 1, 1);
@@ -547,12 +557,14 @@ if (!mesSeleccionado) {
   cargarInformacionUsuario(): void {
     try {
       const userData = JSON.parse(localStorage.getItem('users') || '{}');
+        console.log('Es administrador uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu:', this.esAdministrador);
+        console.log('Usuario actual:', this.usuarioActual);
 
       if (userData && Object.keys(userData).length > 0) {
         this.usuarioActual = userData;
         this.esAdministrador = this.verificarEsAdministrador(userData.rol);
         console.log('Usuario actual:', this.usuarioActual);
-        console.log('Es administrador:', this.esAdministrador);
+        console.log('Es administrador uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu:', this.esAdministrador);
       }
     } catch (error) {
       console.error('Error al cargar usuario:', error);

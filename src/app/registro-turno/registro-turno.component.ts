@@ -60,6 +60,7 @@ export interface Turno {
   nombre: string;
   horaInicio: string;
   horaFin: string;
+  //activo:boolean;
 }
 @Component({
   selector: 'app-registro-turno',
@@ -169,7 +170,10 @@ export class RegistroTurnoComponent implements OnInit {
   ) {
 //turno registro
     this.registroTurnoService.getAllTurno().subscribe((data: any) => {
-      this.codigo = data;
+     // this.codigo = data;
+     console.log('Turnos cargados sulayyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy:', data);
+        this.codigo = data.filter((turno: any) => turno.activo); // solo turnos activos
+
     });
 
     this.registroTurnoService
