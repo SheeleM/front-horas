@@ -46,7 +46,6 @@ export class RegistroComponent implements OnInit {
   async cargarPreguntas() {
     this.registroUserService.getPreguntas().subscribe({
       next: (response: any) => {
-        console.log('Preguntas response:', response); // Debug log
         if (Array.isArray(response)) {
           this.preguntas = response;
         } else if (response.data && Array.isArray(response.data)) {

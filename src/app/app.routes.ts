@@ -15,6 +15,8 @@ export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'registro', component: RegistroComponent },
+  { path: 'recovery', component: RecuperarPasswordComponent },
+
 
   {
     path: '',
@@ -23,7 +25,6 @@ export const routes: Routes = [
     children: [
       { path: 'home', component: HomeComponent },
       { path: 'listarUsuario', component: ListarUsuariosComponent },
-      { path: 'recovery', component: RecuperarPasswordComponent },
       {
         path: 'maestroTurno',
         component: MaestroTurnoComponent,
