@@ -171,7 +171,6 @@ export class RegistroTurnoComponent implements OnInit {
 //turno registro
     this.registroTurnoService.getAllTurno().subscribe((data: any) => {
      // this.codigo = data;
-     console.log('Turnos cargados sulayyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy:', data);
         this.codigo = data.filter((turno: any) => turno.activo); // solo turnos activos
 
     });

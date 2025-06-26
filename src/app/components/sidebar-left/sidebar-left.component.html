@@ -1,43 +1,44 @@
 <aside class="sidebar">
-  
-   <div class="profile-section">
-    <img
-       src="assets/logo2.png" alt="Horas Extras" class="profile-pic" />
-
-    <div class="username">Juan Pérez</div>
-    <div class="role">Usuario</div>
+  <div class="profile-section">
+<img src="https://cdn-icons-png.flaticon.com/512/3048/3048122.png" alt="Avatar neutro profesional" class="profile-pic" />
+    <div class="username">Laura Méndez</div>
+    <div class="role">Administradora</div>
   </div>
-  
+
   <ul class="menu">
     <li class="menu-item">
+      <a [routerLink]="['/home']">
+        <i class="icon fas fa-home"></i> Inicio
+      </a>
+    </li>
+    <li class="menu-item">
       <a [routerLink]="['/listarUsuario']">
-        <i class="icon"></i> Usuarios
+        <i class="icon fas fa-users"></i> Usuarios
       </a>
     </li>
     <li class="menu-item">
       <a [routerLink]="['/maestroTurno']">
-        <i class="icon"></i> Maestro turno
+        <i class="icon fas fa-calendar-alt"></i> Maestro turno
       </a>
     </li>
     <li class="menu-item">
       <a [routerLink]="['/maestroHoraLegal']">
-        <i class="icon"></i> Maestro tipo de hora extra
+        <i class="icon fas fa-clock"></i> Maestro tipo de hora extra
       </a>
     </li>
     <li class="menu-item">
       <a [routerLink]="['/RegistroTurno']">
-        <i class="icon"></i> Gestión de turnos
+        <i class="icon fas fa-tasks"></i> Gestión de turnos
       </a>
     </li>
     <li class="menu-item">
       <a [routerLink]="['/registrohora']">
-        <i class="icon"></i> Horas extras
+        <i class="icon fas fa-stopwatch"></i> Horas extras
       </a>
     </li>
-
-        <li class="menu-item">
-      <a [routerLink]="['/registrohora']">
-        <i class="icon"></i> Cerrar sesión
+    <li class="menu-item">
+      <a [routerLink]="['/logout']">
+        <i class="icon fas fa-sign-out-alt"></i> Cerrar sesión
       </a>
     </li>
   </ul>

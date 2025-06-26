@@ -51,7 +51,7 @@ export class LoginComponent implements OnInit {
     };
     this.loginServices.auth(loginData).subscribe({
       next: (data) => {
-        this.router.navigate(['/listarUsuario']);
+        this.router.navigate(['/home']);
       },
       error: (err) => {
         Swal.fire({

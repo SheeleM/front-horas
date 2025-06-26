@@ -42,6 +42,7 @@
   .turno-form-container {
     width: 100%;
     max-width: 1200px; /* Aumentado de 800px a 1200px */
+    margin-left: 100px;
   }
   
   .card {
@@ -623,3 +624,4 @@ height: 10px !important;
   padding: 0 8px !important;
   text-align: center !important;
 }
+

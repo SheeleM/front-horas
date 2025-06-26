@@ -67,8 +67,8 @@ html, body {
 }
 
 .profile-pic {
-  width: 120px;         /* Aumentado el tamaño */
-  height: 120px;        /* Aumentado el tamaño */
+  width: 90px;         /* Aumentado el tamaño */
+  height: 90px;        /* Aumentado el tamaño */
   border-radius: 50%;   /* Mantiene la forma circular */
   object-fit: contain;  /* Cambiado a contain para mantener la proporción */
   margin-bottom: 10px;

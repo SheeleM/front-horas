@@ -28,8 +28,8 @@ export const routes: Routes = [
       {
         path: 'maestroTurno',
         component: MaestroTurnoComponent,
-        canActivate: [rolesGuard],
-        data: { roles: ['admin', 'INGENIERO'] },
+       // canActivate: [rolesGuard],
+       // data: { roles: ['admin', 'INGENIERO'] },
       },
       { path: 'RegistroTurno', component: RegistroTurnoComponent },
       { path: 'registrohora', component: RegistroHorasComponent },

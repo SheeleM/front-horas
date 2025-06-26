@@ -127,27 +127,32 @@
                 </small>
               </div>
             </div>
-               <div class="col-md-6">
-              <div class="form-group">
-                <label>Guardia</label>
-                <mat-slide-toggle
-                  [checked]="turnoForm.get('guardia')?.value"
-                  (change)="onToggleChange('guardia', $event)"
-                  formControlName="guardia"
-                ></mat-slide-toggle>
+            <!-- Nueva fila para Guardia y Activo uno al lado del otro -->
+            <div class="row gx-3 mb-3">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Guardia</label>
+                  <mat-slide-toggle    color="primary"
+                    [checked]="turnoForm.get('guardia')?.value"
+                    (change)="onToggleChange('guardia', $event)"
+                    formControlName="guardia"
+                  ></mat-slide-toggle>
+                </div>
               </div>
-                 <div class="form-group">
-                <label>Activo</label>
-                <mat-slide-toggle
-                  [checked]="turnoForm.get('activo')?.value"
-                  (change)="onToggleChangeActivo('activo', $event)"
-                  formControlName="activo"
-                ></mat-slide-toggle>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Activo</label>
+                  <mat-slide-toggle    color="primary"
+                    [checked]="turnoForm.get('activo')?.value"
+                    (change)="onToggleChangeActivo('activo', $event)"
+                    formControlName="activo"
+                  ></mat-slide-toggle>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="text-center mt-4">
+          <div class="boton-derecha">
             <button
               type="submit"
               class="btn btn-primary"
@@ -185,7 +190,6 @@
             />
           </div>
         </div>
-
       </div>
 
       <div class="card-body p-0">
@@ -202,7 +206,6 @@
                 <th scope="col">Guardia</th>
                 <th scope="col">Activo</th>
                 <th scope="col">Acciones</th>
-
               </tr>
             </thead>
             <tbody>
@@ -214,10 +217,9 @@
                 <td>{{ turno.diaInicio }}</td>
                 <td>{{ turno.horaFin | date : "HH:mm" }}</td>
                 <td>{{ turno.diaFin }}</td>
-                <td>{{ turno.guardia ? 'SI' : 'no'}}</td>
-                <td>{{ turno.activo ? 'SI' : 'no'}}</td>
+                <td>{{ turno.guardia ? "SI" : "no" }}</td>
+                <td>{{ turno.activo ? "SI" : "no" }}</td>
 
-           
                 <td>
                   <div class="acciones-container">
                     <button
@@ -302,8 +304,6 @@
           de {{ turnosFiltrados.length }} turnos
         </div>
       </div>
-
-      
     </div>
   </div>
 </div>

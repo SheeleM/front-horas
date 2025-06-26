@@ -108,30 +108,38 @@
             </div>
           </div>
 
-          <div class="row gx-3 mb-3">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="horaInicio2">FESTIVO</label>
-            <p><mat-slide-toggle formControlName="esFestivo" labelPosition="before"></mat-slide-toggle></p>
-
-
-                <small class="text-danger" *ngIf="horaInicio2Invalid">
-                  Formato requerido: HH:MM (ej. 08:00)
-                </small>
-              </div>
+<div class="row gx-3 mb-3">
+  <div class="col-md-6">
+    <div class="form-group">
+      <!-- FESTIVO -->
+              <label >FESTIVO</label>
+        <mat-slide-toggle
+          formControlName="esFestivo"
+          labelPosition="before"
+          color="primary"
+        ></mat-slide-toggle>
+      </div>
             </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label for="horaFin2">DOMINGO</label>
-                         <p><mat-slide-toggle formControlName="esDomingo" labelPosition="before"></mat-slide-toggle></p>
 
-                <small class="text-danger" *ngIf="horaFin2Invalid">
-                  Formato requerido: HH:MM (ej. 17:00)
-                </small>
-              </div>
-            </div>
-          </div>
-          
+      <!-- DOMINGO -->
+      <div class="col-md-6">
+            <div class="form-group">
+        <label >DOMINGO</label>
+        <mat-slide-toggle
+          formControlName="esDomingo"
+          labelPosition="before"
+          color="primary"
+        ></mat-slide-toggle>
+      </div>
+    </div>
+  </div>
+
+
+
+    
+
+
+    
           <div class="text-center mt-4" style="display: flex; justify-content: flex-end; align-items: center;">
             <button
               type="submit"
