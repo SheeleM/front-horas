@@ -11,22 +11,22 @@
         <i class="icon fas fa-home"></i> Inicio
       </a>
     </li>
-    <li class="menu-item">
+    <li class="menu-item"  *ngIf="data.rol === 'admin'" >
       <a [routerLink]="['/listarUsuario']">
         <i class="icon fas fa-users"></i> Usuarios
       </a>
     </li>
-    <li class="menu-item">
+    <li class="menu-item" *ngIf="data.rol === 'admin'">
       <a [routerLink]="['/maestroTurno']">
         <i class="icon fas fa-calendar-alt"></i> Maestro turno
       </a>
     </li>
-    <li class="menu-item">
+    <li class="menu-item" *ngIf="data.rol === 'admin'">
       <a [routerLink]="['/maestroHoraLegal']">
         <i class="icon fas fa-clock"></i> Maestro tipo de hora extra
       </a>
     </li>
-    <li class="menu-item">
+    <li class="menu-item" *ngIf="data.rol === 'admin'">
       <a [routerLink]="['/RegistroTurno']">
         <i class="icon fas fa-tasks"></i> Gestión de turnos
       </a>

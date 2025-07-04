@@ -13,10 +13,14 @@ import { LoginComponent } from '../../login/login.component';
 })
 export class SidebarLeftComponent implements OnInit {
 data:any 
+
   constructor(private router: Router, private login: LoginService){
     this.data = JSON.parse(localStorage.getItem('users') || ({} as any));
-    console.log(this.data);
+    const rol = this.data.rol; // Ej: "admin", "consultor"
+
+    console.log("DATOS EN EL LOCALLLLLLLLLLLLLLLLLL, "+this.data.rol);
   }
+
   menuItems = {
     favoritos: [
       { title: 'Gestión de turnos', icon: 'fa-circle', link: '/gestion-turnos' },
