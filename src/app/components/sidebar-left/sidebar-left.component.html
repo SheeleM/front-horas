@@ -1,8 +1,8 @@
 <aside class="sidebar">
   <div class="profile-section">
 <img src="https://cdn-icons-png.flaticon.com/512/3048/3048122.png" alt="Avatar neutro profesional" class="profile-pic" />
-    <div class="username">Laura Méndez</div>
-    <div class="role">Administradora</div>
+    <div class="username">{{ data.nombre }}</div>
+    <div class="role">{{ data.rol === 'admin' ? 'Administrador' : 'Consultor' }}</div>
   </div>
 
   <ul class="menu">
