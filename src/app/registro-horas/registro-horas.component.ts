@@ -228,39 +228,23 @@ export class RegistroHorasComponent {
   }
 
   ngOnInit(): void {
-    // Elimina o comenta la siguiente línea si no tienes authService:
-    // const usuarioActual = this.authService.getUsuarioActual();
-    // this.esAdministrador = usuarioActual?.rol === 'ADMIN' || usuarioActual?.rol === 'ADMINISTRADOR';
-    // console.log('Usuario actual:', usuarioActual);
-    // console.log('Es administrador:', this.esAdministrador);
+
 
     // ✅ Cargar información del usuario desde localStorage
     this.cargarInformacionUsuario();
-    console.log('Usuario cargado:', this.usuarioActual);
-    console.log('Es administrador:', this.esAdministrador);
+
 
     this.cargarHorasExtras();
   }
 
   // ✅ CORREGIR: Método cargarHorasExtras mejorado
   cargarHorasExtras(): void {
-  //  const fechaDesde = this.filtrosForm.get('fechaDesde')?.value;
-   // const fechaHasta = this.filtrosForm.get('fechaHasta')?.value;
+
 
  
     // ✅ OBTENER ESTADOS SELECCIONADOS CORRECTAMENTE
   const mesSeleccionado = this.filtrosForm.get('mesSeleccionado')?.value;
 
-/*
-if (!mesSeleccionado) {
-  Swal.fire({
-    icon: 'warning',
-    title: 'Mes requerido',
-    text: 'Por favor selecciona un mes.',
-  });
-  return;
-}
-*/
 
   const [anio, mes] = mesSeleccionado.split('-').map(Number);
   const fechaDesde = new Date(anio, mes - 1, 1);
@@ -278,7 +262,6 @@ if (!mesSeleccionado) {
 
     this.registroHoraService.obtenerHorasExtras(filtros).subscribe({
       next: (horasExtras: any[]) => {
-        console.log('Datos recibidos del servicio:', horasExtras);
 
         this.horasExtras = horasExtras.map((hora) => ({
           ...hora,
@@ -298,7 +281,6 @@ if (!mesSeleccionado) {
         this.dataSource.data = this.horasExtras;
 
         this.cargaInicialCompleta = true;
-        console.log('Horas extras procesadas:', this.horasExtras);
       },
       error: (err) => {
         console.error('Error al cargar horas extras:', err);
@@ -375,7 +357,6 @@ if (!mesSeleccionado) {
     }
 
     const data = this.registroHoraForm.value;
-    console.log('Enviando datos:', data);
 
     if (this.editandoTurno && this.editandoId) {
       // Modo edición
@@ -414,7 +395,6 @@ if (!mesSeleccionado) {
       // Modo creación
       this.registroHoraService.crearHoraExtra(data).subscribe({
         next: (res) => {
-          console.log('Hora extra creada:', res);
           this.registroHoraForm.reset();
           Swal.fire({
             icon: 'success',
@@ -455,7 +435,6 @@ if (!mesSeleccionado) {
   }
   // ✅ NUEVO: Método para editar
   editarHoraExtra(element: HoraExtra): void {
-    console.log('ENTRO A EDITAR HORA EXTRA XXX');
 
     this.editandoTurno = true;
     this.editandoId = element.idHoraExtra;
@@ -557,14 +536,12 @@ if (!mesSeleccionado) {
   cargarInformacionUsuario(): void {
     try {
       const userData = JSON.parse(localStorage.getItem('users') || '{}');
-        console.log('Es administrador uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu:', this.esAdministrador);
-        console.log('Usuario actual:', this.usuarioActual);
+   
 
       if (userData && Object.keys(userData).length > 0) {
         this.usuarioActual = userData;
         this.esAdministrador = this.verificarEsAdministrador(userData.rol);
-        console.log('Usuario actual:', this.usuarioActual);
-        console.log('Es administrador uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu:', this.esAdministrador);
+       
       }
     } catch (error) {
       console.error('Error al cargar usuario:', error);
@@ -637,7 +614,6 @@ if (!mesSeleccionado) {
           .cambiarEstadoHoraExtra(horaExtra.idHoraExtra, nuevoEstado)
           .subscribe({
             next: (response) => {
-              console.log('Respuesta del backend:', response);
               Swal.fire(
                 'Actualizado',
                 `Estado cambiado a ${nuevoEstado}`,
@@ -728,7 +704,6 @@ if (!mesSeleccionado) {
         ? this.dataSource.filteredData
         : this.dataSource.data;
 
-    console.log('Datos para exportar:', data); // Para debugging
 
     // ✅ CORRECCIÓN: Verificar que hay datos antes de procesarlos
     if (!data || data.length === 0) {
@@ -818,6 +793,5 @@ if (!mesSeleccionado) {
     this.registroHoraForm.patchValue({
       [controlName]: event.checked
     });
-    console.log(`${controlName} changed to:`, event.checked);
   }
 }

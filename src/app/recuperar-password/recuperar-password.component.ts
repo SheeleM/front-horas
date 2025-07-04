@@ -40,8 +40,6 @@ export class RecuperarPasswordComponent implements OnInit {
 
   ngOnInit(): void {
     this.recuperarForm.get('cedula')?.valueChanges.subscribe(value => {
-      console.log("valor cedula from " + value)
-      console.log('Tipo de dato de cédula:', typeof value);
 
       if (value && value.length >= 5) {
         this.loadSecurityQuestion(value);
@@ -56,7 +54,6 @@ export class RecuperarPasswordComponent implements OnInit {
     this.securityQuestion = 'Cargando pregunta...';
 
     try {
-      console.log('cedula-->', cedula)
       this.recuperarPasswordService.getByCedula(cedula).subscribe((data: any) => {
         if (data.success) {
           this.securityQuestion = data.question || '¿Cuál es tu pregunta de seguridad?';

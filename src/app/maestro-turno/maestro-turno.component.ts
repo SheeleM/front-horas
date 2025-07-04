@@ -220,9 +220,6 @@ error: (err) => {
 
     this.editandoTurno = true;
     this.turnoEditId = turno.idTurno;
-
-    console.log('Editando turno:', turno);
-    console.log('ID del turno en edición:', this.turnoEditId);
   }
 
   eliminarTurno(id: number): void {
@@ -408,13 +405,11 @@ error: (err) => {
     this.turnoForm.patchValue({
       [controlName]: event.checked,
     });
-    console.log(`${controlName} changed to:`, event.checked);
   }
 
   onToggleChangeActivo(controlName: 'activo', event: any): void {
     this.turnoForm.patchValue({
       [controlName]: event.checked,
     });
-    console.log(`${controlName} changed to:`, event.checked);
   }
 }

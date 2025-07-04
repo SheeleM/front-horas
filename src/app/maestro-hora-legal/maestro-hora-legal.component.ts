@@ -83,14 +83,12 @@ export class MaestroHoraLegalComponent implements OnInit {
 
   ngOnInit(): void {
     this.listarHorasLegales();
-    console.log('Componente inicializado'); // Debug
   }
 
   // Actualiza el método listarHorasLegales para asegurarse de que los datos se mapeen correctamente
   listarHorasLegales(): void {
     this.maestroHoraLegalService.ListarHorasLegal().subscribe({
       next: (data: any) => {
-        console.log('Datos recibidos del backend:', data);
         
         // Transformar los datos antes de asignarlos
         const transformedData = Array.isArray(data) ? data : (data?.data || []);
@@ -106,7 +104,6 @@ export class MaestroHoraLegalComponent implements OnInit {
           domingo: !!item.domingo
         }));
 
-        console.log('Datos procesados:', this.dataSource.data);
       },
       error: (err) => {
         console.error('Error al listar horas legales:', err);
@@ -149,14 +146,12 @@ export class MaestroHoraLegalComponent implements OnInit {
         esDomingo: !!formValue.esDomingo
       };
 
-      console.log('Datos a enviar:', datos);
 
       if (this.editandoTurno && this.editandoId) {
         // Actualizar registro existente
         this.maestroHoraLegalService.actualizarMaestroHoraLegal(this.editandoId, datos)
           .subscribe({
             next: (response) => {
-              console.log('Respuesta de actualización:', response);
               Swal.fire({
                 icon: 'success',
                 title: '¡Actualización exitosa!',
@@ -183,7 +178,6 @@ export class MaestroHoraLegalComponent implements OnInit {
         this.maestroHoraLegalService.crearMaestroHoraLegal(datos)
           .subscribe({
             next: (response) => {
-              console.log('Respuesta de creación:', response);
               Swal.fire({
                 icon: 'success',
                 title: '¡Registro exitoso!',

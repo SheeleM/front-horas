@@ -50,7 +50,6 @@ export class lregistroHoraService {
    * @returns Observable con la respuesta del servidor
    */
   crearHoraExtra(data: CreateHoraExtraDto): Observable<any> {
-    console.log('Enviando datos al backend:', data);
     return this.http.post(this.apiUrl, data);
   }
 
@@ -72,9 +71,7 @@ obtenerHorasExtras(filtros: FiltrosHorasExtra): Observable<HoraExtra[]> {
     params = params.set('estados', filtros.estado.join(','));
   }
 
-  console.log('Obteniendo horas extras con filtros:', filtros);
-  console.log('Parámetros HTTP enviados:', params.toString());
-  
+
   return this.http.get<HoraExtra[]>(this.apiUrl, { params });
 }
   /**
@@ -99,7 +96,6 @@ obtenerHorasExtras(filtros: FiltrosHorasExtra): Observable<HoraExtra[]> {
 */
 
   actualizarHoraExtra(id: number, data: UpdateHoraExtraDto): Observable<any> {
-    console.log('Actualizando hora extra:', { id, data });
     return this.http.patch(`${this.apiUrl}/${id}`, data);
   }
 

@@ -17,8 +17,6 @@ data:any
   constructor(private router: Router, private login: LoginService){
     this.data = JSON.parse(localStorage.getItem('users') || ({} as any));
     const rol = this.data.rol; // Ej: "admin", "consultor"
-
-    console.log("DATOS EN EL LOCALLLLLLLLLLLLLLLLLL, "+this.data.rol);
   }
 
   menuItems = {

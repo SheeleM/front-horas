@@ -131,9 +131,7 @@ export class ListarUsuariosComponent implements OnInit {
   async obtenerUsuarios() {
     try {
       this.listarUsuarioService.obtenerUsuarios().subscribe((response: any) => {
-        console.log('Respuesta de obtenerUsuarios:', response); // <-- Agrega esto temporalmente
-        // Ajusta según la estructura real de la respuesta:
-       // this.usuarios = response.data ?? response ?? [];
+
       this.usuarios = response ?? []; //array
       // this.usuarios = response.data ?? []; //
         this.usuarios.forEach(usuario => {
@@ -186,7 +184,6 @@ export class ListarUsuariosComponent implements OnInit {
         rol: Number(usuario.rol.idRol),
       };
 
-      console.log(datosActualizados);
       this.listarUsuarioService.actualizarUsuario(datosActualizados).subscribe({
         next: () => {
           this.usuariosOriginales[usuario.id] = {

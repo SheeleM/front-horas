@@ -54,7 +54,6 @@ export class RegistroComponent implements OnInit {
           console.error('Unexpected response format:', response);
           this.preguntas = [];
         }
-        console.log('Preguntas processed:', this.preguntas); // Debug log
       },
       error: (error) => {
         console.error('Error al cargar preguntas:', error);

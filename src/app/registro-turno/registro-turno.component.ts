@@ -310,7 +310,6 @@ export class RegistroTurnoComponent implements OnInit {
       .getAllUsuariosTurno()
       .subscribe((data: UsuarioTurno[]) => {
         this.usuarioTurnos = data;
-        console.log('turnos cargados', this.usuarioTurnos);
         const mesActual = Number(this.AsignacionTurnoFormMes.get('mes')?.value);
         if (!isNaN(mesActual)) {
           this.filtrarTurnosPorMesYDistribuirEnSemanas(mesActual);
@@ -385,8 +384,7 @@ export class RegistroTurnoComponent implements OnInit {
   }
 
   agregar(): void {
-    console.log('Ingenieros:', this.selectedIngenieros);
-    console.log('Form data:', this.AsignacionTurnoForm.value);
+
   }
   onSubmit(): void {
     if (this.editandoTurno && this.turnoEditId !== null) {
@@ -583,7 +581,6 @@ crearTurnosConfirmados(turnoFK: number, fechaInicio: Date, fechaFin: Date) {
     });
    }
     // Depuración: muestra el objeto turno recibido
-    console.log('Turno recibido en editarTurno:', turno);
   
     let ingenieroId: number | null = null;
   
@@ -609,7 +606,6 @@ crearTurnosConfirmados(turnoFK: number, fechaInicio: Date, fechaFin: Date) {
       console.warn('No se pudo asignar ingenieroId válido para selectedIngenieros');
     }
   
-    console.log('Ingeniero seleccionado:', this.selectedIngenieros);
   }
   
   obtenerIdTurnoPorCodigo(codigo: string): number | null {
