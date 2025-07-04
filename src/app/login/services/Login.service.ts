@@ -30,4 +30,10 @@ export class LoginService {
       access_token: localStorage.getItem('access_token')
     };
   }
+
+  logout(): void {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('users');
+}
+
 }

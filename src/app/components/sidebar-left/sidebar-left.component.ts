@@ -1,6 +1,8 @@
+import { LoginService } from './../../login/services/Login.service';
 import { CommonModule  } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
+import { LoginComponent } from '../../login/login.component';
 
 @Component({
   selector: 'app-sidebar-left',
@@ -11,7 +13,7 @@ import { Router, RouterModule } from '@angular/router';
 })
 export class SidebarLeftComponent implements OnInit {
 data:any 
-  constructor(private router: Router){
+  constructor(private router: Router, private login: LoginService){
     this.data = JSON.parse(localStorage.getItem('users') || ({} as any));
     console.log(this.data);
   }
@@ -43,4 +45,11 @@ data:any
   navigateToPage() {
     this.router.navigate(['/maestroTurno']); // Ajusta la ruta según sea necesario
   }
+
+  logout(): void {
+  this.login.logout();
+  this.router.navigate(['/login']);
+}
+
+
 }
