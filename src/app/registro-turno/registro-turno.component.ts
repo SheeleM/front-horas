@@ -196,16 +196,12 @@ esConsultor: boolean = false;
 
 ngOnInit(): void {
 // Obtener el usuario desde localStorage (ajusta según tu lógica real)
-const userString = localStorage.getItem('user');
-const user = userString ? JSON.parse(userString) : { rol: '' };
-const rawRol = user.rol || '';
-const rol = rawRol.toLowerCase().trim();
-
-console.log('Rol del usuario:', rawRol);
-console.log('Rol procesado:', rol);
-
-this.esConsultor = rol === 'consultor';
-console.log('¿Es consultor?', this.esConsultor);
+   const userData = localStorage.getItem('users');
+    if (userData) {
+      const parsedData = JSON.parse(userData);
+      this.esConsultor = parsedData.rol === 'Consultor';
+    }
+    console.log("usuariooo en turno",userData)
 
 
 

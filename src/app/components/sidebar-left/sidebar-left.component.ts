@@ -42,6 +42,7 @@ data:any
       const parsedData = JSON.parse(userData);
 
     }
+    console.log("usuariooo en sidebar",userData)
   }
 
   navigateToPage() {

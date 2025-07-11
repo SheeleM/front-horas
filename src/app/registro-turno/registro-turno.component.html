@@ -185,7 +185,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let turno of semana">
-            <td>
+            <td *ngIf="!esConsultor">
               <mat-checkbox *ngIf="!esConsultor"
                 [checked]="estaSeleccionado(turno.idUsuarioTurno)"
                 (change)="toggleSeleccion(turno.idUsuarioTurno)">
@@ -198,7 +198,7 @@
             <td>{{ turno.turno.horaFin  | date: 'HH:mm' }}</td>
             <td>{{ turno.codigo }}</td>
             <td>{{ turno.turno.nombre || 'Sin descripción' }}</td>
-            <td>
+            <td *ngIf="!esConsultor">
               <div *ngIf="!esConsultor" class="acciones-container">
                 <button mat-icon-button color="primary"  (click)="editarTurno(turno)">
                   <mat-icon>edit</mat-icon>
