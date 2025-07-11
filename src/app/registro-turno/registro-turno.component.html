@@ -8,7 +8,7 @@
       </div>
 
       <div class="card-body">
-        <form [formGroup]="AsignacionTurnoForm" (ngSubmit)="onSubmit()">
+        <form  *ngIf="!esConsultor" [formGroup]="AsignacionTurnoForm" (ngSubmit)="onSubmit()" >
           <!-- Primera fila: Turnos y Periodo U alineados -->
      <!-- Primera fila: Turnos y Periodo U alineados correctamente -->
 
@@ -135,9 +135,9 @@
   </form>
 </div>
 
-    <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
+    <div *ngIf="!esConsultor" class="d-flex justify-content-between align-items-center mt-3 mb-2">
  <!-- Botón para eliminar seleccionados -->
-      <button 
+      <button  
         mat-raised-button 
         color="warn" 
         class="action-button"
@@ -165,13 +165,14 @@
       <table class="table table-hover text-center">
         <thead class="table-light">
           <tr>
-            <th>
+            <th  *ngIf="!esConsultor">
               <mat-checkbox 
                 [checked]="todosSeleccionadosSemana(semana)"
                 [indeterminate]="algunoSeleccionadoSemana(semana) && !todosSeleccionadosSemana(semana)"
                 (change)="toggleSeleccionarTodosSemana(semana, $event.checked)">
               </mat-checkbox>
             </th>
+
             <th>Ingeniero</th>
             <th>Fecha Inicio</th>
             <th>Fecha Fin</th>
@@ -179,13 +180,13 @@
             <th>Hora Fin</th>
             <th>Turno</th>
             <th>Nombre</th>
-            <th>Acciones</th>
+            <th *ngIf="!esConsultor">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let turno of semana">
             <td>
-              <mat-checkbox
+              <mat-checkbox *ngIf="!esConsultor"
                 [checked]="estaSeleccionado(turno.idUsuarioTurno)"
                 (change)="toggleSeleccion(turno.idUsuarioTurno)">
               </mat-checkbox>
@@ -198,7 +199,7 @@
             <td>{{ turno.codigo }}</td>
             <td>{{ turno.turno.nombre || 'Sin descripción' }}</td>
             <td>
-              <div class="acciones-container">
+              <div *ngIf="!esConsultor" class="acciones-container">
                 <button mat-icon-button color="primary"  (click)="editarTurno(turno)">
                   <mat-icon>edit</mat-icon>
                 </button>

@@ -1,389 +1,400 @@
-<div class="registro-container">
-  <div class="turno-form-container">
-    <div class="card mb-4">
-      <div class="card-header bg-white">
-        <h2 class="text-primary">
-          {{
-            editandoTurno
-              ? "Editar horas extras"
-              : "Registro de horas extras consultores"
-          }}
-        </h2>
-      </div>
-      <div class="card-body">
-        <form [formGroup]="registroHoraForm" (ngSubmit)="onSubmit()">
-          <!-- Ticket y Fecha en la misma fila, lado a lado -->
-          <div class="d-flex gap-3 mb-3" style="display: flex; gap: 16px">
-            <div style="flex: 1">
-              <div class="form-group">
-                <label for="fecha">Fecha</label>
-                <input
-                  id="fecha"
-                  type="date"
-                  formControlName="fecha"
-                  [class.is-invalid]="fechaInvalid"
-                  class="form-control"
-                />
-                <small class="text-danger" *ngIf="fechaInvalid">
-                  La fecha es requerida
-                </small>
-              </div>
-            </div>
-            <div style="flex: 1">
-              <div class="form-group">
-                <label for="ticket">Número de ticket</label>
-                <input
-                  id="ticket"
-                  type="text"
-                  formControlName="ticket"
-                  [class.is-invalid]="ticketInvalid"
-                  class="form-control"
-                />
-                <small class="text-danger" *ngIf="ticketInvalid">
-                  El ticket del turno es requerido
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <!-- Hora inicio y Hora fin en la misma fila, lado a lado -->
-          <div class="d-flex gap-3 mb-3" style="display: flex; gap: 16px">
-            <div style="flex: 1">
-              <div class="form-group">
-                <label for="horaInicio">Hora inicio</label>
-                <input
-                  type="time"
-                  class="form-control"
-                  id="horaInicio"
-                  formControlName="horaInicio"
-                  placeholder="08:00"
-                  [class.is-invalid]="horaInicioInvalid"
-                />
-                <small class="text-danger" *ngIf="horaInicioInvalid">
-                  La hora de inicio es requerida
-                </small>
-              </div>
-            </div>
-            <div style="flex: 1">
-              <div class="form-group">
-                <label for="horaFin">Hora fin</label>
-                <input
-                  type="time"
-                  class="form-control"
-                  id="horaFin"
-                  formControlName="horaFin"
-                  placeholder="17:00"
-                  [class.is-invalid]="horaFinInvalid"
-                />
-                <small class="text-danger" *ngIf="horaFinInvalid">
-                  La hora de fin es requerida
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <div class="row gx-3 mb-3">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>FESTIVO</label>
-                <mat-slide-toggle
-                  [checked]="registroHoraForm.get('esFestivo')?.value"
-                  (change)="onToggleChange('esFestivo', $event)"
-                  formControlName="esFestivo"
-                ></mat-slide-toggle>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>DOMINGO</label>
-                <mat-slide-toggle
-                  [checked]="registroHoraForm.get('esDomingo')?.value"
-                  (change)="onToggleChange('esDomingo', $event)"
-                  formControlName="esDomingo"
-                ></mat-slide-toggle>
-              </div>
-            </div>
-          </div>
-          <!-- Botones alineados a la derecha -->
-          <div
-            class="agregar-btn-right mt-4 mb-4"
-            style="
-              display: flex;
-              justify-content: flex-end;
-              align-items: center;
-            "
-          >
-            <button
-              type="submit"
-              mat-raised-button
-              color="primary"
-              class="action-button me-3"
-            >
-              {{ editandoTurno ? "Actualizar" : "Agregar" }}
-            </button>
-            <button
-              *ngIf="editandoTurno"
-              type="button"
-              mat-raised-button
-              color="warn"
-              class="action-button"
-              (click)="cancelarEdicion()"
-            >
-              Cancelar
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Tabla de horas extras -->
-    <div class="card mt-4">
-      <div class="card-header bg-white">
-        <h3 class="text-primary mb-0">Horas extras registradas</h3>
-      </div>
-      <div class="card-body">
-        <!-- ✅ SECCIÓN DE FILTROS CON REACTIVE FORMS -->
-        <div class="filtros-container mb-4">
-          <form [formGroup]="filtrosForm" class="filtros-form">
-         
-
-       <div class="filtro-item">
-  <label for="mesSeleccionado" class="form-label">Mes</label>
-  <input
-    id="mesSeleccionado"
-    type="month"
-    class="form-control"
-    formControlName="mesSeleccionado"
-  />
-</div>
-
-
-            <div class="filtro-item">
-              <label for="estados" class="form-label">Estado</label>
-              <mat-form-field class="estados" appearance="outline">
-                <mat-select formControlName="estados" multiple>
-                  <mat-select-trigger>
-                    {{ getEstadosSeleccionados() }}
-                  </mat-select-trigger>
-
-                  <!-- Opción "Seleccionar todos" -->
-                  <mat-option
-                    #allSelected
-                    [value]="'todos'"
-                    (click)="toggleTodosLosEstados()"
-                    [class.mat-selected]="isAllSelected()"
-                  >
-                    Todos los estados
-                  </mat-option>
-
-                  <!-- Opciones individuales -->
-                  <mat-option
-                    *ngFor="let estado of estadosDisponibles"
-                    [value]="estado.valor"
-                    (click)="toggleIndividualEstado()"
-                  >
-                    {{ estado.nombre }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-
-            <button
-              type="button"
-              mat-raised-button
-              (click)="limpiarFiltros()"
-              class="btn-limpiar-filtros"
-            >
-              <mat-icon>clear</mat-icon>
-              Limpiar
-            </button>
-            <button
-              type="button"
-              mat-raised-button
-              (click)="cargarHorasExtras()"
-              class="btn-limpiar-filtros1"
-            >
-              Buscar
-            </button>
-            <button (click)="exportarAExcel()" class="btn-limpiar-filtros1">
-              <mat-icon>download</mat-icon> Exportar a Excel
-            </button>
-          </form>
-
-          <!-- Contador de resultados -->
-          <div class="mt-2">
-            <small class="text-muted">
-              Mostrando
-              {{ dataSource.filteredData.length || dataSource.data.length }} de
-              {{ datosOriginales.length }} registros
-            </small>
-          </div>
+<div class="registro-container" *ngIf="cargado">
+  <div class="registro-container">
+    <div class="turno-form-container">
+      <div class="card mb-4">
+        <div class="card-header bg-white">
+          <h2 class="text-primary">
+            {{
+              editandoTurno
+                ? "Editar horas extras"
+                : "Registro de horas extras consultores"
+            }}
+          </h2>
         </div>
-
-        <div class="table-responsive">
-          <table
-            mat-table
-            [dataSource]="dataSource"
-            class="mat-elevation-z8 table-hover w-100"
-          >
-            <!-- Ingeniero -->
-            <ng-container matColumnDef="ingeniero">
-              <th mat-header-cell *matHeaderCellDef>Ingeniero</th>
-              <td mat-cell *matCellDef="let element">
-                {{ element.usuario.fullname }}
-              </td>
-            </ng-container>
-            <!-- Fecha -->
-            <ng-container matColumnDef="fecha">
-              <th mat-header-cell *matHeaderCellDef>Fecha</th>
-              <td mat-cell *matCellDef="let element">
-                {{ element.fecha | date : "dd/MM/yyyy" }}
-              </td>
-            </ng-container>
-
-            <!-- Turno -->
-            <ng-container matColumnDef="turno">
-              <th mat-header-cell *matHeaderCellDef>Turno</th>
-              <td mat-cell *matCellDef="let element">
-                {{ element.usuarioTurno?.turno?.codigo || "N/A" }}
-              </td>
-            </ng-container>
-
-            <!-- Ticket -->
-            <ng-container matColumnDef="ticket">
-              <th mat-header-cell *matHeaderCellDef>Ticket</th>
-              <td mat-cell *matCellDef="let element">
-                {{ element.ticket || "N/A" }}
-              </td>
-            </ng-container>
-
-            <!-- Hora inicio -->
-            <ng-container matColumnDef="horaInicio">
-              <th mat-header-cell *matHeaderCellDef>Hora inicio</th>
-              <td mat-cell *matCellDef="let element">
-                {{ element.horaInicio || "N/A" }}
-              </td>
-            </ng-container>
-
-            <!-- Hora fin -->
-            <ng-container matColumnDef="horaFin">
-              <th mat-header-cell *matHeaderCellDef>Hora fin</th>
-              <td mat-cell *matCellDef="let element">
-                {{ element.horaFin || "N/A" }}
-              </td>
-            </ng-container>
-
-            <!-- Tiempo -->
-            <ng-container matColumnDef="tiempo">
-              <th mat-header-cell *matHeaderCellDef>Tiempo</th>
-              <td mat-cell *matCellDef="let element">
-                {{ element.tiempo || "0:00" }}
-              </td>
-            </ng-container>
-
-            <!-- Tipo de hora -->
-            <ng-container matColumnDef="tipoHora">
-              <th mat-header-cell *matHeaderCellDef>Tipo de hora</th>
-              <td mat-cell *matCellDef="let element">
-                {{ element.tipoHora || "No asignado" }}
-              </td>
-            </ng-container>
-
-            <!-- Estado -->
-            <ng-container matColumnDef="estado">
-              <th mat-header-cell *matHeaderCellDef>Estado</th>
-              <td mat-cell *matCellDef="let element">
-                <!-- ✅ DROPDOWN para administradores -->
-                <div *ngIf="esAdministrador; else estadoSoloLectura">
-                  <select
-                    class="form-select form-select-sm estado-select"
-                    [value]="element.estado"
-                    (change)="
-                      cambiarEstadoHoraExtra(element, $any($event.target).value)
-                    "
-                    [class.badge-warning]="element.estado === 'PENDIENTE'"
-                    [class.badge-success]="element.estado === 'APROBADA'"
-                    [class.badge-danger]="element.estado === 'RECHAZADA'"
-                  >
-                    <option value="PENDIENTE">Pendiente</option>
-                    <option value="APROBADA">Aprobada</option>
-                    <option value="RECHAZADA">Rechazada</option>
-                  </select>
+        <div class="card-body">
+          <form [formGroup]="registroHoraForm" (ngSubmit)="onSubmit()">
+            <!-- Ticket y Fecha en la misma fila, lado a lado -->
+            <div class="d-flex gap-3 mb-3" style="display: flex; gap: 16px">
+              <div style="flex: 1">
+                <div class="form-group">
+                  <label for="fecha">Fecha</label>
+                  <input
+                    id="fecha"
+                    type="date"
+                    formControlName="fecha"
+                    [class.is-invalid]="fechaInvalid"
+                    class="form-control"
+                  />
+                  <small class="text-danger" *ngIf="fechaInvalid">
+                    La fecha es requerida
+                  </small>
                 </div>
-
-                <!-- ✅ TEMPLATE para consultores (solo lectura) -->
-                <ng-template #estadoSoloLectura>
-                  <span [class]="'badge ' + obtenerClaseEstado(element.estado)">
-                    {{ element.estado || "PENDIENTE" }}
-                  </span>
-                </ng-template>
-              </td>
-            </ng-container>
-
-     <!-- Domingo -->
-<ng-container matColumnDef="esDomingo">
-  <th mat-header-cell *matHeaderCellDef> DOMINGO </th>
-  <td mat-cell *matCellDef="let element">
-    {{ element.esDomingo ? 'Sí' : 'No' }}
-  </td>
-</ng-container>
-
-
-        <!-- Festivo -->
-<ng-container matColumnDef="esFestivo">
-  <th mat-header-cell *matHeaderCellDef> FESTIVO </th>
-  <td mat-cell *matCellDef="let element">
-    {{ element.esFestivo ? 'Sí' : 'No' }}
-  </td>
-</ng-container>
-
-            <!-- Acciones -->
-            <ng-container matColumnDef="acciones">
-              <th mat-header-cell *matHeaderCellDef>Acciones</th>
-              <td mat-cell *matCellDef="let element">
-                <div class="acciones-container">
-                  <button
-                    mat-icon-button
-                    color="primary"
-                    class="boton-editar"
-                    (click)="editarHoraExtra(element)"
-                    matTooltip="Editar"
-                  >
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    color="warn"
-                    class="boton-eliminar"
-                    (click)="eliminarHoraExtra(element)"
-                    matTooltip="Eliminar"
-                  >
-                    <mat-icon>delete</mat-icon>
-                  </button>
+              </div>
+              <div style="flex: 1">
+                <div class="form-group">
+                  <label for="ticket">Número de ticket</label>
+                  <input
+                    id="ticket"
+                    type="text"
+                    formControlName="ticket"
+                    [class.is-invalid]="ticketInvalid"
+                    class="form-control"
+                  />
+                  <small class="text-danger" *ngIf="ticketInvalid">
+                    El ticket del turno es requerido
+                  </small>
                 </div>
-              </td>
-            </ng-container>
+              </div>
+            </div>
 
-            <tr
-              mat-header-row
-              *matHeaderRowDef="displayedColumns"
-              class="bg-light-blue"
-            ></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-            <tr class="mat-row" *matNoDataRow>
-              <td
-                class="mat-cell"
-                [attr.colspan]="displayedColumns.length"
-                style="text-align: center; padding: 20px"
+            <!-- Hora inicio y Hora fin en la misma fila, lado a lado -->
+            <div class="d-flex gap-3 mb-3" style="display: flex; gap: 16px">
+              <div style="flex: 1">
+                <div class="form-group">
+                  <label for="horaInicio">Hora inicio</label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="horaInicio"
+                    formControlName="horaInicio"
+                    placeholder="08:00"
+                    [class.is-invalid]="horaInicioInvalid"
+                  />
+                  <small class="text-danger" *ngIf="horaInicioInvalid">
+                    La hora de inicio es requerida
+                  </small>
+                </div>
+              </div>
+              <div style="flex: 1">
+                <div class="form-group">
+                  <label for="horaFin">Hora fin</label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="horaFin"
+                    formControlName="horaFin"
+                    placeholder="17:00"
+                    [class.is-invalid]="horaFinInvalid"
+                  />
+                  <small class="text-danger" *ngIf="horaFinInvalid">
+                    La hora de fin es requerida
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <div class="row gx-3 mb-3">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>FESTIVO</label>
+                  <mat-slide-toggle
+                    [checked]="registroHoraForm.get('esFestivo')?.value"
+                    (change)="onToggleChange('esFestivo', $event)"
+                    formControlName="esFestivo"
+                  ></mat-slide-toggle>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>DOMINGO</label>
+                  <mat-slide-toggle
+                    [checked]="registroHoraForm.get('esDomingo')?.value"
+                    (change)="onToggleChange('esDomingo', $event)"
+                    formControlName="esDomingo"
+                  ></mat-slide-toggle>
+                </div>
+              </div>
+            </div>
+            <!-- Botones alineados a la derecha -->
+            <div
+              class="agregar-btn-right mt-4 mb-4"
+              style="
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+              "
+            >
+              <button
+                type="submit"
+                mat-raised-button
+                color="primary"
+                class="action-button me-3"
               >
-                No hay horas extras registradas que coincidan con los filtros
-                aplicados.
-              </td>
-            </tr>
-          </table>
+                {{ editandoTurno ? "Actualizar" : "Agregar" }}
+              </button>
+              <button
+                *ngIf="editandoTurno"
+                type="button"
+                mat-raised-button
+                color="warn"
+                class="action-button"
+                (click)="cancelarEdicion()"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tabla de horas extras -->
+      <div class="card mt-4">
+        <div class="card-header bg-white">
+          <h3 class="text-primary mb-0">Horas extras registradas</h3>
+        </div>
+        <div class="card-body">
+          <!-- ✅ SECCIÓN DE FILTROS CON REACTIVE FORMS -->
+          <div class="filtros-container mb-4">
+            <form [formGroup]="filtrosForm" class="filtros-form">
+              <div class="filtro-item">
+                <label for="mesSeleccionado" class="form-label">Mes</label>
+                <input
+                  id="mesSeleccionado"
+                  type="month"
+                  class="form-control"
+                  formControlName="mesSeleccionado"
+                />
+              </div>
+                   <div class="filtro-item">
+                <label for="ingeniero" class="form-label">Ingeniero</label>
+                <mat-form-field appearance="outline" class="estados">
+                  <mat-select
+                    formControlName="ingeniero"
+                    placeholder="Seleccione un ingeniero"
+                  >
+                    <mat-option value="">Todos</mat-option>
+                    <mat-option
+                      *ngFor="let ingeniero of ingenierosDisponibles"
+                      [value]="ingeniero.id"
+                    >
+                      {{ ingeniero.nombre }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="filtro-item">
+                <label for="estados" class="form-label">Estado</label>
+                <mat-form-field class="estados" appearance="outline">
+                  <mat-select formControlName="estados" multiple>
+                    <mat-select-trigger>
+                      {{ getEstadosSeleccionados() }}
+                    </mat-select-trigger>
+
+                    <!-- Opción "Seleccionar todos" -->
+                    <mat-option
+                      #allSelected
+                      [value]="'todos'"
+                      (click)="toggleTodosLosEstados()"
+                      [class.mat-selected]="isAllSelected()"
+                    >
+                      Todos los estados
+                    </mat-option>
+
+                    <!-- Opciones individuales -->
+                    <mat-option
+                      *ngFor="let estado of estadosDisponibles"
+                      [value]="estado.valor"
+                      (click)="toggleIndividualEstado()"
+                    >
+                      {{ estado.nombre }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <button
+                type="button"
+                mat-raised-button
+                (click)="cargarHorasExtras()"
+                class="btn-limpiar-filtros1"
+              >
+                Buscar
+              </button>
+              <button (click)="exportarAExcel()" class="btn-limpiar-filtros1">
+                <mat-icon>download</mat-icon> Exportar a Excel
+              </button>
+         
+            </form>
+
+            <!-- Contador de resultados -->
+            <div class="mt-2">
+              <small class="text-muted">
+                Mostrando
+                {{ dataSource.filteredData.length || dataSource.data.length }}
+                de {{ datosOriginales.length }} registros
+              </small>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table
+              mat-table
+              [dataSource]="dataSource"
+              class="mat-elevation-z8 table-hover w-100"
+            >
+              <!-- Ingeniero -->
+              <ng-container matColumnDef="ingeniero">
+                <th mat-header-cell *matHeaderCellDef>Ingeniero</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.usuario.fullname }}
+                </td>
+              </ng-container>
+              <!-- Fecha -->
+              <ng-container matColumnDef="fecha">
+                <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.fecha | date : "dd/MM/yyyy" }}
+                </td>
+              </ng-container>
+
+              <!-- Turno -->
+              <ng-container matColumnDef="turno">
+                <th mat-header-cell *matHeaderCellDef>Turno</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.usuarioTurno?.turno?.codigo || "N/A" }}
+                </td>
+              </ng-container>
+
+              <!-- Ticket -->
+              <ng-container matColumnDef="ticket">
+                <th mat-header-cell *matHeaderCellDef>Ticket</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.ticket || "N/A" }}
+                </td>
+              </ng-container>
+
+              <!-- Hora inicio -->
+              <ng-container matColumnDef="horaInicio">
+                <th mat-header-cell *matHeaderCellDef>Hora inicio</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.horaInicio || "N/A" }}
+                </td>
+              </ng-container>
+
+              <!-- Hora fin -->
+              <ng-container matColumnDef="horaFin">
+                <th mat-header-cell *matHeaderCellDef>Hora fin</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.horaFin || "N/A" }}
+                </td>
+              </ng-container>
+
+              <!-- Tiempo -->
+              <ng-container matColumnDef="tiempo">
+                <th mat-header-cell *matHeaderCellDef>Tiempo</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.tiempo || "0:00" }}
+                </td>
+              </ng-container>
+
+              <!-- Tipo de hora -->
+              <ng-container matColumnDef="tipoHora">
+                <th mat-header-cell *matHeaderCellDef>Tipo de hora</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.tipoHora || "No asignado" }}
+                </td>
+              </ng-container>
+
+              <!-- Estado -->
+              <ng-container matColumnDef="estado">
+                <th mat-header-cell *matHeaderCellDef>Estado</th>
+                <td mat-cell *matCellDef="let element">
+                  <!-- ✅ DROPDOWN para administradores -->
+                  <div *ngIf="esAdministrador; else estadoSoloLectura">
+                    <select
+                      class="form-select form-select-sm estado-select"
+                      [value]="element.estado"
+                      (change)="
+                        cambiarEstadoHoraExtra(
+                          element,
+                          $any($event.target).value
+                        )
+                      "
+                      [class.badge-warning]="element.estado === 'PENDIENTE'"
+                      [class.badge-success]="element.estado === 'APROBADA'"
+                      [class.badge-danger]="element.estado === 'RECHAZADA'"
+                    >
+                      <option value="PENDIENTE">Pendiente</option>
+                      <option value="APROBADA">Aprobada</option>
+                      <option value="RECHAZADA">Rechazada</option>
+                    </select>
+                  </div>
+
+                  <!-- ✅ TEMPLATE para consultores (solo lectura) -->
+                  <ng-template #estadoSoloLectura>
+                    <span
+                      [class]="'badge ' + obtenerClaseEstado(element.estado)"
+                    >
+                      {{ element.estado || "PENDIENTE" }}
+                    </span>
+                  </ng-template>
+                </td>
+              </ng-container>
+
+              <!-- Domingo -->
+              <ng-container matColumnDef="esDomingo">
+                <th mat-header-cell *matHeaderCellDef>DOMINGO</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.esDomingo ? "Sí" : "No" }}
+                </td>
+              </ng-container>
+
+              <!-- Festivo -->
+              <ng-container matColumnDef="esFestivo">
+                <th mat-header-cell *matHeaderCellDef>FESTIVO</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.esFestivo ? "Sí" : "No" }}
+                </td>
+              </ng-container>
+
+              <!-- Acciones -->
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let element">
+                  <div class="acciones-container">
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      class="boton-editar"
+                      (click)="editarHoraExtra(element)"
+                      matTooltip="Editar"
+                    >
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      class="boton-eliminar"
+                      (click)="eliminarHoraExtra(element)"
+                      matTooltip="Eliminar"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr
+                mat-header-row
+                *matHeaderRowDef="displayedColumns"
+                class="bg-light-blue"
+              ></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+              <tr class="mat-row" *matNoDataRow>
+                <td
+                  class="mat-cell"
+                  [attr.colspan]="displayedColumns.length"
+                  style="text-align: center; padding: 20px"
+                >
+                  No hay horas extras registradas que coincidan con los filtros
+                  aplicados.
+                </td>
+              </tr>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-

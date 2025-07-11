@@ -95,6 +95,7 @@ export interface Turno {
   styleUrls: ['./registro-turno.component.css'],
 })
 export class RegistroTurnoComponent implements OnInit {
+esConsultor: boolean = false;
 
     // Nueva propiedad para manejar la selección múltiple
   turnosSeleccionados: Set<number> = new Set();
@@ -193,7 +194,21 @@ export class RegistroTurnoComponent implements OnInit {
       });
   }
 
-  ngOnInit(): void {
+ngOnInit(): void {
+// Obtener el usuario desde localStorage (ajusta según tu lógica real)
+const userString = localStorage.getItem('user');
+const user = userString ? JSON.parse(userString) : { rol: '' };
+const rawRol = user.rol || '';
+const rol = rawRol.toLowerCase().trim();
+
+console.log('Rol del usuario:', rawRol);
+console.log('Rol procesado:', rol);
+
+this.esConsultor = rol === 'consultor';
+console.log('¿Es consultor?', this.esConsultor);
+
+
+
     this.AsignacionTurnoForm = this.fb.group({
       fechaInicio: [''],
       fechaFin: [''],

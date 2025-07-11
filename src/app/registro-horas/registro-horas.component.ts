@@ -138,6 +138,9 @@ export interface FiltrosHorasExtra {
 })
 export class RegistroHorasComponent {
   @ViewChild('allSelected') allSelected!: MatOption;
+  cargado = false;
+
+ingenierosDisponibles: { id: number; nombre: string }[] = [];
 
   registroHoraForm!: FormGroup;
   editandoTurno: boolean = false;
@@ -152,6 +155,8 @@ export class RegistroHorasComponent {
   filtrosForm: FormGroup = new FormGroup({
   mesSeleccionado: new FormControl(''), // 👈 nuevo
   estados: new FormControl([]),
+  ingeniero: new FormControl('') // 👈 nuevo
+
 });
 
 
@@ -229,7 +234,9 @@ export class RegistroHorasComponent {
 
   ngOnInit(): void {
 
-
+setTimeout(() => {
+    this.cargado = true;
+  }, 100); // 100ms o más si es necesario
     // ✅ Cargar información del usuario desde localStorage
     this.cargarInformacionUsuario();
 
@@ -263,6 +270,8 @@ export class RegistroHorasComponent {
     this.registroHoraService.obtenerHorasExtras(filtros).subscribe({
       next: (horasExtras: any[]) => {
 
+
+
         this.horasExtras = horasExtras.map((hora) => ({
           ...hora,
           estado: hora.estado || 'PENDIENTE',
@@ -273,13 +282,27 @@ export class RegistroHorasComponent {
        esFestivo: Boolean(hora.esFestivo), // Convierte a boolean
         esDomingo: Boolean(hora.esDomingo)  // Convierte a boolean
         }));
-
+this.ingenierosDisponibles = this.horasExtras
+  .map(h => h.usuario)
+  .filter(u => u && u.fullname) // evita nulos
+  .reduce((acc: any[], curr: any) => {
+    const existe = acc.find(i => i.id === curr.id);
+    if (!existe) acc.push({ id: curr.id, nombre: curr.fullname });
+    return acc;
+  }, []);
         // Guardar datos originales
         this.datosOriginales = [...this.horasExtras];
 
         // Actualizar la tabla
         this.dataSource.data = this.horasExtras;
+        const idIngeniero = this.filtrosForm.get('ingeniero')?.value;
 
+this.dataSource.filterPredicate = (data, filter) => {
+  const coincideIngeniero = !idIngeniero || data.usuario?.id === idIngeniero;
+  return coincideIngeniero;
+};
+
+this.dataSource.filter = Math.random().toString(); // fuerza el filtrado
         this.cargaInicialCompleta = true;
       },
       error: (err) => {
@@ -687,6 +710,7 @@ export class RegistroHorasComponent {
     worksheet.columns = [
       { header: 'Fecha', key: 'fecha', width: 15 },
       { header: 'Ingeniero', key: 'ingeniero', width: 25 },
+      { header: 'Cédula', key: 'cedula', width: 15 },
       { header: 'Turno', key: 'turno', width: 10 },
       { header: 'Hora Inicio', key: 'horaInicio', width: 12 },
       { header: 'Hora Fin', key: 'horaFin', width: 12 },
@@ -722,6 +746,7 @@ export class RegistroHorasComponent {
           ? new Date(row.fecha).toLocaleDateString('es-ES')
           : 'N/A',
         ingeniero: row.usuario?.fullname || 'N/A',
+        cedula: row.usuario?.cedula || 'N/A',
         turno: row.usuarioTurno?.turno?.codigo || 'N/A',
         horaInicio: row.horaInicio || 'N/A',
         horaFin: row.horaFin || 'N/A',
